@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Finanzas Familiares</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--bg2:#13161e;--bg3:#1a1e2a;--border:#252a38;--accent:#4ade80;--accent2:#60a5fa;--accent3:#f59e0b;--danger:#f87171;--text:#e8eaf0;--text2:#8892a4;--card:#161b26}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh}
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0}
+.logo{padding:0 20px 20px;border-bottom:1px solid var(--border)}
+.logo h1{font-size:17px;font-weight:800;color:var(--accent);letter-spacing:-.5px}
+.logo p{font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:2px}
+nav{padding:12px 0;flex:1;overflow-y:auto}
+.nav-section{padding:8px 20px 4px;font-size:9px;font-family:'DM Mono',monospace;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(74,222,128,.06)}
+.nav-icon{font-size:15px;width:18px;text-align:center}
+.nav-user{padding:12px 20px;border-top:1px solid var(--border);margin-top:auto}
+.nav-user-email{font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#main{flex:1;overflow-y:auto;background:var(--bg)}
+.topbar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar h2{font-size:19px;font-weight:800}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.page{padding:18px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.green::before{background:var(--accent)}.kpi.blue::before{background:var(--accent2)}.kpi.yellow::before{background:var(--accent3)}.kpi.red::before{background:var(--danger)}
+.kpi-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:20px;font-weight:800;margin:5px 0 2px;letter-spacing:-1px}
+.kpi-sub{font-size:11px;font-family:'DM Mono',monospace;color:var(--text2)}
+.btn{padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;transition:all .15s}
+.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:#3cc76e}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--accent2)}
+.btn-danger{background:rgba(248,113,113,.15);color:var(--danger);border:1px solid rgba(248,113,113,.3)}
+.btn-sm{padding:4px 9px;font-size:11px}
+.btn-icon{background:none;border:none;cursor:pointer;color:var(--text2);font-size:13px;padding:3px 6px;border-radius:4px}
+.btn-icon:hover{color:var(--danger);background:rgba(248,113,113,.1)}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.table-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-header h3{font-size:13px;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th{padding:9px 14px;text-align:left;font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;background:var(--bg3);border-bottom:1px solid var(--border)}
+td{padding:9px 14px;font-size:13px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+select,input[type=text],input[type=date],input[type=number]{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 11px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border .15s}
+select:focus,input:focus{border-color:var(--accent2)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:flex;align-items:center;justify-content:center}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:17px;font-weight:800;margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-full{grid-column:1/-1}
+label{display:block;font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.form-group{display:flex;flex-direction:column}
+input[type=text],input[type=date],input[type=number],select{width:100%}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-card h3{font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.bar-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s}
+.bar-val{font-size:11px;font-family:'DM Mono',monospace;color:var(--text);width:90px;text-align:right}
+.mes-tabs{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}
+.mes-tab{padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:var(--bg3);color:var(--text2);border:1px solid var(--border);transition:all .15s}
+.mes-tab.active{background:rgba(74,222,128,.1);color:var(--accent);border-color:rgba(74,222,128,.3)}
+.split-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px}
+.split-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.split-card h4{font-size:10px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.grupo-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-family:'DM Mono',monospace;font-weight:600;text-transform:uppercase}
+.grupo-fijo{background:rgba(96,165,250,.12);color:var(--accent2);border:1px solid rgba(96,165,250,.2)}
+.grupo-variable{background:rgba(245,158,11,.12);color:var(--accent3);border:1px solid rgba(245,158,11,.2)}
+.grupo-financiero{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.2)}
+.tarjeta-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.tarjeta-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.tc-VG::before{background:linear-gradient(90deg,#1a56db,#3b82f6)}.tc-MG::before{background:linear-gradient(90deg,#eb5757,#f87171)}.tc-MN::before{background:linear-gradient(90deg,#059669,#34d399)}.tc-VM::before{background:linear-gradient(90deg,#7c3aed,#a78bfa)}.tc-AE::before{background:linear-gradient(90deg,#b45309,#f59e0b)}
+.tarjeta-nombre{font-size:13px;font-weight:800;margin-bottom:2px}
+.tarjeta-info{font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:12px}
+.tarjeta-monto{font-size:22px;font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+.tarjeta-vto{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:4px;display:inline-block}
+.vto-urgente{background:rgba(248,113,113,.15);color:var(--danger);border:1px solid rgba(248,113,113,.3)}
+.vto-pronto{background:rgba(245,158,11,.15);color:var(--accent3);border:1px solid rgba(245,158,11,.3)}
+.vto-ok{background:rgba(74,222,128,.1);color:var(--accent);border:1px solid rgba(74,222,128,.2)}
+.tarjetas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.resumen-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:10px;font-family:'DM Mono',monospace;background:rgba(96,165,250,.1);color:var(--accent2);border:1px solid rgba(96,165,250,.2)}
+.info-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:14px}
+.info-box strong{color:var(--text)}.info-box.ok{border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.05)}.info-box.warn{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.05)}
+.settings-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+.settings-section h3{font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.cat-list{display:flex;flex-direction:column;gap:6px}
+.cat-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)}
+.cat-item-name{flex:1;font-size:13px;font-weight:600}
+.cat-add-row{display:flex;gap:8px;margin-top:10px}.cat-add-row input,.cat-add-row select{flex:1}
+.periodos-table{width:100%;border-collapse:collapse;margin-top:8px}
+.periodos-table th{padding:7px 10px;text-align:left;font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border)}
+.periodos-table td{padding:6px 10px;font-size:12px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace}
+.periodos-table input{padding:4px 8px;font-size:11px;width:120px}
+.quien-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-family:'DM Mono',monospace;font-weight:700}
+.quien-vm{background:rgba(74,222,128,.1);color:var(--accent);border:1px solid rgba(74,222,128,.2)}
+.quien-dayu{background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2)}
+.text-mono{font-family:'DM Mono',monospace}
+.monto-positivo{color:var(--accent);font-family:'DM Mono',monospace;font-weight:500}
+.monto-negativo{color:var(--danger);font-family:'DM Mono',monospace;font-weight:500}
+.empty-state{padding:36px;text-align:center;color:var(--text2);font-family:'DM Mono',monospace;font-size:12px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div id="login-screen" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:20px">
+  <div style="text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">💰</div>
+    <h1 style="font-size:24px;font-weight:800;color:var(--accent);margin-bottom:4px">Finanzas Familiares</h1>
+    <p style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2)">Acceso privado · Solo familia</p>
+  </div>
+  <button id="btn-google-login" style="display:flex;align-items:center;gap:10px;background:#fff;color:#1f1f1f;border:none;padding:12px 24px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)">
+    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Entrar con Google
+  </button>
+  <div id="login-error" style="color:var(--danger);font-size:12px;font-family:'DM Mono',monospace;display:none"></div>
+</div>
+
+<div id="app" style="display:none">
+  <div id="sidebar">
+    <div class="logo"><h1>💰 Finanzas</h1><p id="sync-status">●  Conectando...</p></div>
+    <nav>
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="navTo('dashboard',this)"><span class="nav-icon">📊</span>Dashboard</div>
+      <div class="nav-item" onclick="navTo('movimientos',this)"><span class="nav-icon">📋</span>Movimientos</div>
+      <div class="nav-section">Tarjetas</div>
+      <div class="nav-item" onclick="navTo('resumenes',this)"><span class="nav-icon">💳</span>Resúmenes</div>
+      <div class="nav-item" onclick="navTo('config-tarjetas',this)"><span class="nav-icon">🗓️</span>Fechas tarjetas</div>
+      <div class="nav-section">Análisis</div>
+      <div class="nav-item" onclick="navTo('categorias',this)"><span class="nav-icon">🏷️</span>Por Categoría</div>
+      <div class="nav-item" onclick="navTo('comparativa',this)"><span class="nav-icon">📈</span>Comparativa</div>
+      <div class="nav-section">Config</div>
+      <div class="nav-item" onclick="navTo('config',this)"><span class="nav-icon">⚙️</span>Categorías</div>
+    </nav>
+    <div class="nav-user">
+      <div class="nav-user-email" id="user-email"></div>
+      <button class="btn btn-secondary btn-sm" style="width:100%" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </div>
+  <div id="main">
+
+    <div id="page-dashboard" class="page-section">
+      <div class="topbar"><h2>Dashboard</h2>
+        <div class="topbar-actions"><button class="btn btn-primary" onclick="abrirModal()">+ Nuevo movimiento</button></div>
+      </div>
+      <div class="page">
+        <div class="mes-tabs" id="mes-tabs-dash"></div>
+        <div class="kpi-grid" id="kpis"></div>
+        <div class="split-grid" id="split-cards"></div>
+        <div class="chart-grid">
+          <div class="chart-card"><h3>Top categorías</h3><div id="chart-cat"></div></div>
+          <div class="chart-card"><h3>Ingresos vs Gastos</h3><div id="chart-ing-gas"></div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>Últimos movimientos</h3></div>
+          <table><thead><tr><th>Fecha</th><th>Quién</th><th>Descripción</th><th>Categoría</th><th>Tarjeta</th><th>Resumen</th><th>Monto</th></tr></thead>
+          <tbody id="tbody-recientes"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-movimientos" class="page-section" style="display:none">
+      <div class="topbar"><h2>Movimientos</h2><div class="topbar-actions"><button class="btn btn-primary" onclick="abrirModal()">+ Nuevo</button><button class="btn btn-secondary" onclick="exportarCSV()">↓ CSV</button></div></div>
+      <div class="page">
+        <div class="filters">
+          <select id="fil-mes" onchange="renderMovimientos()"><option value="">Todos</option><option value="2026-01">Enero</option><option value="2026-02">Febrero</option><option value="2026-03">Marzo</option><option value="2026-04">Abril</option><option value="2026-05">Mayo</option><option value="2026-06">Junio</option><option value="2026-07">Julio</option><option value="2026-08">Agosto</option></select>
+          <select id="fil-tipo" onchange="renderMovimientos()"><option value="">Todos</option><option value="gasto">Gastos</option><option value="ingreso">Ingresos</option></select>
+          <select id="fil-quien" onchange="renderMovimientos()"><option value="">Todos</option><option value="VM">VM</option><option value="Dayu">Dayu</option></select>
+          <select id="fil-tarjeta" onchange="renderMovimientos()"><option value="">Todas tarjetas</option><option value="VG">VG</option><option value="MG">MG</option><option value="MN">MN</option><option value="VM">VM-Macro</option><option value="AE">AE</option><option value="efectivo">Efectivo</option></select>
+          <select id="fil-cat" onchange="renderMovimientos()"><option value="">Todas las categorías</option></select>
+          <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="renderMovimientos()" style="min-width:120px">
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><h3 id="mov-count"></h3><span id="mov-total" class="text-mono" style="font-size:12px;color:var(--text2)"></span></div>
+          <table><thead><tr><th>Fecha</th><th>Quién</th><th>Descripción</th><th>Categoría</th><th>Tarjeta</th><th>Resumen</th><th>Monto</th><th></th></tr></thead>
+          <tbody id="tbody-movimientos"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-resumenes" class="page-section" style="display:none">
+      <div class="topbar"><h2>Resúmenes</h2></div>
+      <div class="page">
+        <div class="mes-tabs" id="mes-tabs-res"></div>
+        <div class="info-box" id="info-resumenes"></div>
+        <div class="tarjetas-grid" id="tarjetas-grid"></div>
+        <div class="table-wrap">
+          <div class="table-header"><h3 id="res-titulo">Detalle</h3></div>
+          <table><thead><tr><th>Fecha</th><th>Quién</th><th>Descripción</th><th>Categoría</th><th>Tarjeta</th><th>Monto</th></tr></thead>
+          <tbody id="tbody-resumenes"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-config-tarjetas" class="page-section" style="display:none">
+      <div class="topbar"><h2>Fechas de Tarjetas</h2></div>
+      <div class="page">
+        <div class="info-box">Cargá el cierre y vencimiento exacto por mes. Al editar recalcula todos los gastos automáticamente.</div>
+        <div id="config-tarjetas-content"></div>
+      </div>
+    </div>
+
+    <div id="page-categorias" class="page-section" style="display:none">
+      <div class="topbar"><h2>Por Categoría</h2></div>
+      <div class="page">
+        <div class="mes-tabs" id="mes-tabs-cat"></div>
+        <div class="chart-grid">
+          <div class="chart-card"><h3>Gastos Fijos</h3><div id="chart-fijos"></div></div>
+          <div class="chart-card"><h3>Gastos Variables</h3><div id="chart-variables"></div></div>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Categoría</th><th>Grupo</th><th>Movs</th><th>Total</th><th>%</th></tr></thead><tbody id="tbody-cat"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="page-comparativa" class="page-section" style="display:none">
+      <div class="topbar"><h2>Comparativa</h2></div>
+      <div class="page">
+        <div class="kpi-grid" id="kpis-comp"></div>
+        <div class="chart-grid">
+          <div class="chart-card"><h3>Ingresos vs Gastos</h3><div id="chart-comp1"></div></div>
+          <div class="chart-card"><h3>Fijos vs Variables</h3><div id="chart-comp2"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-config" class="page-section" style="display:none">
+      <div class="topbar"><h2>Categorías</h2></div>
+      <div class="page">
+        <div id="config-grupos"></div>
+        <div class="settings-section"><h3>Agregar categoría</h3>
+          <div class="cat-add-row">
+            <input type="text" id="new-cat-name" placeholder="Nombre">
+            <select id="new-cat-grupo"><option value="fijo">Gasto Fijo</option><option value="variable">Gasto Variable</option><option value="financiero">Financiero/Salud</option><option value="ingreso">Ingreso</option></select>
+            <button class="btn btn-primary" onclick="agregarCategoria()">+ Agregar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <h3>Nuevo movimiento</h3>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Tipo</label>
+        <select id="m-tipo" onchange="actualizarCatsModal();calcularResumen()">
+          <option value="gasto">💸 Gasto</option><option value="ingreso">💰 Ingreso</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Fecha</label><input type="date" id="m-fecha" onchange="calcularResumen()"></div>
+      <div class="form-group"><label>Monto ($ARS)</label><input type="number" id="m-monto" placeholder="0"></div>
+      <div class="form-group form-full"><label>Descripción</label><input type="text" id="m-desc" placeholder="Ej: Cena restorán"></div>
+      <div class="form-group"><label>Categoría</label><select id="m-cat"></select></div>
+      <div class="form-group"><label>Medio de pago</label>
+        <select id="m-cuenta" onchange="calcularResumen()">
+          <option value="">Efectivo / Débito</option>
+          <option value="VG">💳 VG - Visa Galicia</option>
+          <option value="MG">💳 MG - Mastercard Galicia</option>
+          <option value="MN">💳 MN - Mastercard Nación</option>
+          <option value="VM">💳 VM - Visa Macro</option>
+          <option value="AE">💳 AE - American Express</option>
+        </select>
+      </div>
+      <div class="form-group form-full" id="resumen-info-row" style="display:none">
+        <div id="resumen-info" class="info-box" style="margin-bottom:0"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarMovimiento()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCY4PWO2m84gD6-zScKlHiWHhhGpnlmNDs",
+  authDomain: "finanzas-familia-30c39.firebaseapp.com",
+  projectId: "finanzas-familia-30c39",
+  storageBucket: "finanzas-familia-30c39.firebasestorage.app",
+  messagingSenderId: "732450617135",
+  appId: "1:732450617135:web:0668cbbc0404a65aaa93da"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+const provider = new GoogleAuthProvider();
+const EMAILS_OK = ['brukmanleonel@gmail.com', 'daianastarosc@gmail.com'];
+
+
+const GRUPOS_DEFAULT=[
+  {id:'fijo',nombre:'Gastos Fijos',cats:['Alquiler','Servicios','Seguros','Jardín Noah','Gimnasio','Suscripciones','Monotributo/IIBB','Matrícula Provincial','Empleada']},
+  {id:'variable',nombre:'Gastos Variables',cats:['Supermercado','Delivery','Salidas','Café/Kiosko','Compras','Actividades','Educación','Transporte','Turismo','Niñera','Farmacia','Dayu','Otros']},
+  {id:'financiero',nombre:'Financieros / Salud',cats:['Salud','Gastos financieros']},
+  {id:'ingreso',nombre:'Ingresos',cats:['CENEMAR','Escuela de Medicina','Consultorio','Investigación/Ensayo','Alquiler cobrado','Beca Dayu','Promociones/Cashback','Ventas','Intereses inversiones']}
+];
+const COLORES={fijo:['#60a5fa','#38bdf8','#34d399','#4ade80','#86efac','#a3e635','#fbbf24','#fb923c','#f87171'],variable:['#f59e0b','#fcd34d','#f472b6','#e879f9','#a78bfa','#818cf8','#c084fc','#22d3ee','#2dd4bf','#4ade80','#fb7185','#94a3b8','#64748b'],financiero:['#a78bfa','#f87171'],ingreso:['#4ade80','#34d399','#6ee7b7','#86efac','#bbf7d0','#a7f3d0','#d1fae5']};
+const NOMBRES_MES={'2026-01':'Ene','2026-02':'Feb','2026-03':'Mar','2026-04':'Abr','2026-05':'May','2026-06':'Jun','2026-07':'Jul','2026-08':'Ago','2026-09':'Sep','2026-10':'Oct','2026-11':'Nov','2026-12':'Dic','2027-01':'Ene 27','2027-02':'Feb 27','2027-03':'Mar 27','2027-04':'Abr 27'};
+const NOMBRES_MES_L={'2026-01':'Enero','2026-02':'Febrero','2026-03':'Marzo','2026-04':'Abril','2026-05':'Mayo','2026-06':'Junio','2026-07':'Julio','2026-08':'Agosto','2026-09':'Septiembre','2026-10':'Octubre','2026-11':'Noviembre','2026-12':'Diciembre','2027-01':'Enero 2027','2027-02':'Febrero 2027','2027-03':'Marzo 2027'};
+const TARJETAS_META={VG:{nombre:"Visa Galicia",color:"#3b82f6"},MG:{nombre:"Mastercard Galicia",color:"#f87171"},MN:{nombre:"Mastercard Nación",color:"#34d399"},VM:{nombre:"Visa Macro",color:"#a78bfa"},AE:{nombre:"American Express",color:"#f59e0b"}};
+const PERIODOS_DEFAULT={"VG": {"2026-01": {"cierre": "2026-01-19", "vto": "2026-02-02"}, "2026-02": {"cierre": "2026-02-19", "vto": "2026-03-02"}, "2026-03": {"cierre": "2026-03-19", "vto": "2026-04-02"}, "2026-04": {"cierre": "2026-04-19", "vto": "2026-05-02"}, "2026-05": {"cierre": "2026-05-19", "vto": "2026-06-02"}, "2026-06": {"cierre": "2026-06-19", "vto": "2026-07-02"}, "2026-07": {"cierre": "2026-07-19", "vto": "2026-08-02"}, "2026-08": {"cierre": "2026-08-19", "vto": "2026-09-02"}, "2026-09": {"cierre": "2026-09-19", "vto": "2026-10-02"}, "2026-10": {"cierre": "2026-10-19", "vto": "2026-11-02"}, "2026-11": {"cierre": "2026-11-19", "vto": "2026-12-02"}, "2026-12": {"cierre": "2026-12-19", "vto": "2027-01-02"}, "2027-01": {"cierre": "2027-01-19", "vto": "2027-02-02"}, "2027-02": {"cierre": "2027-02-19", "vto": "2027-03-02"}, "2027-03": {"cierre": "2027-03-19", "vto": "2027-04-02"}, "2027-04": {"cierre": "2027-04-19", "vto": "2027-05-02"}, "2027-05": {"cierre": "2027-05-19", "vto": "2027-06-02"}, "2027-06": {"cierre": "2027-06-19", "vto": "2027-07-02"}}, "MG": {"2026-01": {"cierre": "2026-01-26", "vto": "2026-02-06"}, "2026-02": {"cierre": "2026-02-26", "vto": "2026-03-06"}, "2026-03": {"cierre": "2026-03-26", "vto": "2026-04-06"}, "2026-04": {"cierre": "2026-04-26", "vto": "2026-05-06"}, "2026-05": {"cierre": "2026-05-26", "vto": "2026-06-06"}, "2026-06": {"cierre": "2026-06-26", "vto": "2026-07-06"}, "2026-07": {"cierre": "2026-07-26", "vto": "2026-08-06"}, "2026-08": {"cierre": "2026-08-26", "vto": "2026-09-06"}, "2026-09": {"cierre": "2026-09-26", "vto": "2026-10-06"}, "2026-10": {"cierre": "2026-10-26", "vto": "2026-11-06"}, "2026-11": {"cierre": "2026-11-26", "vto": "2026-12-06"}, "2026-12": {"cierre": "2026-12-26", "vto": "2027-01-06"}, "2027-01": {"cierre": "2027-01-26", "vto": "2027-02-06"}, "2027-02": {"cierre": "2027-02-26", "vto": "2027-03-06"}, "2027-03": {"cierre": "2027-03-26", "vto": "2027-04-06"}, "2027-04": {"cierre": "2027-04-26", "vto": "2027-05-06"}, "2027-05": {"cierre": "2027-05-26", "vto": "2027-06-06"}, "2027-06": {"cierre": "2027-06-26", "vto": "2027-07-06"}}, "MN": {"2026-01": {"cierre": "2026-01-19", "vto": "2026-02-04"}, "2026-02": {"cierre": "2026-02-19", "vto": "2026-03-04"}, "2026-03": {"cierre": "2026-03-19", "vto": "2026-04-04"}, "2026-04": {"cierre": "2026-04-19", "vto": "2026-05-04"}, "2026-05": {"cierre": "2026-05-19", "vto": "2026-06-04"}, "2026-06": {"cierre": "2026-06-19", "vto": "2026-07-04"}, "2026-07": {"cierre": "2026-07-19", "vto": "2026-08-04"}, "2026-08": {"cierre": "2026-08-19", "vto": "2026-09-04"}, "2026-09": {"cierre": "2026-09-19", "vto": "2026-10-04"}, "2026-10": {"cierre": "2026-10-19", "vto": "2026-11-04"}, "2026-11": {"cierre": "2026-11-19", "vto": "2026-12-04"}, "2026-12": {"cierre": "2026-12-19", "vto": "2027-01-04"}, "2027-01": {"cierre": "2027-01-19", "vto": "2027-02-04"}, "2027-02": {"cierre": "2027-02-19", "vto": "2027-03-04"}, "2027-03": {"cierre": "2027-03-19", "vto": "2027-04-04"}, "2027-04": {"cierre": "2027-04-19", "vto": "2027-05-04"}, "2027-05": {"cierre": "2027-05-19", "vto": "2027-06-04"}, "2027-06": {"cierre": "2027-06-19", "vto": "2027-07-04"}}, "VM": {"2026-01": {"cierre": "2026-01-26", "vto": "2026-02-06"}, "2026-02": {"cierre": "2026-02-26", "vto": "2026-03-06"}, "2026-03": {"cierre": "2026-03-26", "vto": "2026-04-06"}, "2026-04": {"cierre": "2026-04-26", "vto": "2026-05-06"}, "2026-05": {"cierre": "2026-05-26", "vto": "2026-06-06"}, "2026-06": {"cierre": "2026-06-26", "vto": "2026-07-06"}, "2026-07": {"cierre": "2026-07-26", "vto": "2026-08-06"}, "2026-08": {"cierre": "2026-08-26", "vto": "2026-09-06"}, "2026-09": {"cierre": "2026-09-26", "vto": "2026-10-06"}, "2026-10": {"cierre": "2026-10-26", "vto": "2026-11-06"}, "2026-11": {"cierre": "2026-11-26", "vto": "2026-12-06"}, "2026-12": {"cierre": "2026-12-26", "vto": "2027-01-06"}, "2027-01": {"cierre": "2027-01-26", "vto": "2027-02-06"}, "2027-02": {"cierre": "2027-02-26", "vto": "2027-03-06"}, "2027-03": {"cierre": "2027-03-26", "vto": "2027-04-06"}, "2027-04": {"cierre": "2027-04-26", "vto": "2027-05-06"}, "2027-05": {"cierre": "2027-05-26", "vto": "2027-06-06"}, "2027-06": {"cierre": "2027-06-26", "vto": "2027-07-06"}}, "AE": {"2026-01": {"cierre": "2026-01-10", "vto": "2026-01-16"}, "2026-02": {"cierre": "2026-02-10", "vto": "2026-02-16"}, "2026-03": {"cierre": "2026-03-10", "vto": "2026-03-16"}, "2026-04": {"cierre": "2026-04-10", "vto": "2026-04-16"}, "2026-05": {"cierre": "2026-05-10", "vto": "2026-05-16"}, "2026-06": {"cierre": "2026-06-10", "vto": "2026-06-16"}, "2026-07": {"cierre": "2026-07-10", "vto": "2026-07-16"}, "2026-08": {"cierre": "2026-08-10", "vto": "2026-08-16"}, "2026-09": {"cierre": "2026-09-10", "vto": "2026-09-16"}, "2026-10": {"cierre": "2026-10-10", "vto": "2026-10-16"}, "2026-11": {"cierre": "2026-11-10", "vto": "2026-11-16"}, "2026-12": {"cierre": "2026-12-10", "vto": "2026-12-16"}, "2027-01": {"cierre": "2027-01-10", "vto": "2027-01-16"}, "2027-02": {"cierre": "2027-02-10", "vto": "2027-02-16"}, "2027-03": {"cierre": "2027-03-10", "vto": "2027-03-16"}, "2027-04": {"cierre": "2027-04-10", "vto": "2027-04-16"}, "2027-05": {"cierre": "2027-05-10", "vto": "2027-05-16"}, "2027-06": {"cierre": "2027-06-10", "vto": "2027-06-16"}}};
+function fmt(n){return'$'+Math.round(n).toLocaleString('es-AR');}
+function getCatGrupo(cat,grupos){for(const g of grupos){if(g.cats.includes(cat))return g;}return null;}
+function getCatColor(cat,grupos){const g=getCatGrupo(cat,grupos);if(!g)return'#94a3b8';const idx=g.cats.indexOf(cat);const cols=COLORES[g.id]||COLORES.variable;return cols[idx%cols.length];}
+function calcularMesResumen(fechaStr,tarjetaId,periodos){
+  if(!tarjetaId||!periodos||!periodos[tarjetaId])return fechaStr.slice(0,7);
+  const fg=new Date(fechaStr+'T12:00:00');
+  const sorted=Object.entries(periodos[tarjetaId]).map(([m,p])=>(({cierre:new Date(p.cierre+'T12:00:00'),cierreStr:p.cierre,vtoStr:p.vto}))).sort((a,b)=>a.cierre-b.cierre);
+  for(const p of sorted){if(fg<=p.cierre)return p.vtoStr.slice(0,7);}
+  const last=sorted[sorted.length-1];return last?last.vtoStr.slice(0,7):fechaStr.slice(0,7);
+}
+function getCierreInfo(fechaStr,tarjetaId,periodos){
+  if(!tarjetaId||!periodos||!periodos[tarjetaId])return null;
+  const fg=new Date(fechaStr+'T12:00:00');
+  const sorted=Object.entries(periodos[tarjetaId]).map(([m,p])=>(({cierre:new Date(p.cierre+'T12:00:00'),cierreStr:p.cierre,vtoStr:p.vto}))).sort((a,b)=>a.cierre-b.cierre);
+  for(const p of sorted){if(fg<=p.cierre)return p;}
+  return sorted[sorted.length-1]||null;
+}
+function remapear(d){
+  const cat=d.categoria,desc=(d.desc||'').toLowerCase();
+  if(d.tipo==='ingreso'){if(desc.includes('cenemar'))return'CENEMAR';if(desc.includes('esm')||desc.includes('escuela'))return'Escuela de Medicina';if(desc.includes('consultorio'))return'Consultorio';if(desc.includes('alquiler'))return'Alquiler cobrado';if(desc.includes('beca')||desc.includes('dayu'))return'Beca Dayu';if(desc.includes('promoci'))return'Promociones/Cashback';return'CENEMAR';}
+  if(cat==='Servicios del hogar'){if(desc.includes('idra')||desc.includes('jardin')||desc.includes('jardín'))return'Jardín Noah';return'Empleada';}
+  if(cat==='Salud'){if(desc.includes('pañales')||desc.includes('crema')||desc.includes('bauza')||desc.includes('t4')||desc.includes('calcio')||desc.includes('farmacia'))return'Farmacia';if(desc.includes('sport')||desc.includes('gym')||desc.includes('club'))return'Gimnasio';return'Salud';}
+  if(cat==='Alimentación'){if(desc.includes('disco')||desc.includes('verduleria')||desc.includes('verdulería')||desc.includes('campo verde')||desc.includes('new garden')||desc.includes('mercalito')||desc.includes('dietética')||desc.includes('almacén')||desc.includes('almacen')||desc.includes('miramar')||desc.includes('anco')||desc.includes('pescadería')||desc.includes('atún'))return'Supermercado';if(desc.includes('negra simona')||desc.includes('lima linda')||desc.includes('rotiser')||desc.includes('pedidos ya'))return'Delivery';if(desc.includes('cafe')||desc.includes('café')||desc.includes('kersen')||desc.includes('atelier')||desc.includes('merci')||desc.includes('tostado')||desc.includes('blanca')||desc.includes('havanna')||desc.includes('chipa')||desc.includes('coronados')||desc.includes('bocados')||desc.includes('aquaro')||desc.includes('churros')||desc.includes('la rapita')||desc.includes('little')||desc.includes('budín')||desc.includes('helado')||desc.includes('chubut'))return'Café/Kiosko';return'Salidas';}
+  if(cat==='Impuestos'){if(desc.includes('matrícula')||desc.includes('matricula'))return'Matrícula Provincial';return'Monotributo/IIBB';}
+  const MAP={'Vivienda':'Alquiler','Servicios':'Servicios','Seguros':'Seguros','Suscripciones':'Suscripciones','Tarjetas/Banco':'Gastos financieros','Salidas/Ocio':'Salidas','Compras':'Compras','Actividades':'Actividades','Educación':'Educación','Familia':'Dayu','Transporte':'Transporte','Turismo':'Turismo'};
+  return MAP[cat]||cat;
+}
+
+const BRUTOS=[{"id":1700000001,"fecha":"2026-01-31","tipo":"ingreso","monto":3230171,"categoria":"Ingresos","cuenta":"","desc":"CENEMAR"},{"id":1700000002,"fecha":"2026-01-31","tipo":"ingreso","monto":236500,"categoria":"Ingresos","cuenta":"","desc":"ESM"},{"id":1700000003,"fecha":"2026-01-31","tipo":"ingreso","monto":732806,"categoria":"Ingresos","cuenta":"","desc":"CONSULTORIO"},{"id":1700000004,"fecha":"2026-01-31","tipo":"ingreso","monto":400000,"categoria":"Ingresos","cuenta":"","desc":"ALQUILERES"},{"id":1700000005,"fecha":"2026-01-31","tipo":"ingreso","monto":720000,"categoria":"Ingresos","cuenta":"","desc":"BECA DAYU"},{"id":1700000006,"fecha":"2026-01-31","tipo":"ingreso","monto":202000,"categoria":"Ingresos","cuenta":"","desc":"PROMOCIONES"},{"id":1700000007,"fecha":"2026-02-28","tipo":"ingreso","monto":3280000,"categoria":"Ingresos","cuenta":"","desc":"CENEMAR"},{"id":1700000008,"fecha":"2026-02-28","tipo":"ingreso","monto":249289,"categoria":"Ingresos","cuenta":"","desc":"ESM"},{"id":1700000009,"fecha":"2026-02-28","tipo":"ingreso","monto":751800,"categoria":"Ingresos","cuenta":"","desc":"CONSULTORIO"},{"id":1700000010,"fecha":"2026-02-28","tipo":"ingreso","monto":400000,"categoria":"Ingresos","cuenta":"","desc":"ALQUILERES"},{"id":1700000011,"fecha":"2026-02-28","tipo":"ingreso","monto":720000,"categoria":"Ingresos","cuenta":"","desc":"BECA DAYU"},{"id":1700000012,"fecha":"2026-02-28","tipo":"ingreso","monto":55000,"categoria":"Ingresos","cuenta":"","desc":"PROMOCIONES"},{"id":1767571200085,"fecha":"2026-01-05","tipo":"gasto","monto":37562,"categoria":"Turismo","cuenta":"VG","desc":"Pinamar beach resort C9/12"},{"id":1767571200086,"fecha":"2026-01-05","tipo":"gasto","monto":68000,"categoria":"Impuestos","cuenta":"VG","desc":"Matrícula Prov"},{"id":1767571200087,"fecha":"2026-01-05","tipo":"gasto","monto":14200,"categoria":"Alimentación","cuenta":"VG","desc":"Havanna"},{"id":1767571200088,"fecha":"2026-01-05","tipo":"gasto","monto":7158,"categoria":"Transporte","cuenta":"VG","desc":"Aerolíneas arg a CABA"},{"id":1767571200089,"fecha":"2026-01-05","tipo":"gasto","monto":87400,"categoria":"Transporte","cuenta":"VG","desc":"Trenes argentinos"},{"id":1767571200090,"fecha":"2026-01-05","tipo":"gasto","monto":58877,"categoria":"Alimentación","cuenta":"VG","desc":"Disco"},{"id":1767571200091,"fecha":"2026-01-05","tipo":"gasto","monto":15160,"categoria":"Alimentación","cuenta":"VG","desc":"Atilios"},{"id":1767571200092,"fecha":"2026-01-05","tipo":"gasto","monto":22640,"categoria":"Actividades","cuenta":"VG","desc":"Acto Noah"},{"id":1767571200093,"fecha":"2026-01-05","tipo":"gasto","monto":47797,"categoria":"Alimentación","cuenta":"VG","desc":"Verduleria"},{"id":1767571200094,"fecha":"2026-01-05","tipo":"gasto","monto":10180,"categoria":"Alimentación","cuenta":"VG","desc":"Anco"},{"id":1767571200095,"fecha":"2026-01-05","tipo":"gasto","monto":15480,"categoria":"Alimentación","cuenta":"VG","desc":"Kalimera"},{"id":1767571200096,"fecha":"2026-01-05","tipo":"gasto","monto":14980,"categoria":"Alimentación","cuenta":"VG","desc":"Atilios"},{"id":1767571200097,"fecha":"2026-01-05","tipo":"gasto","monto":4573,"categoria":"Suscripciones","cuenta":"VG","desc":"Spotify"},{"id":1767571200098,"fecha":"2026-01-05","tipo":"gasto","monto":15530,"categoria":"Alimentación","cuenta":"VG","desc":"Tostado"},{"id":1767571200099,"fecha":"2026-01-05","tipo":"gasto","monto":7299,"categoria":"Suscripciones","cuenta":"VG","desc":"Mercado Libre"},{"id":1767571200100,"fecha":"2026-01-05","tipo":"gasto","monto":25500,"categoria":"Salidas/Ocio","cuenta":"VG","desc":"Blanca Cafe"},{"id":1767571200101,"fecha":"2026-01-05","tipo":"gasto","monto":52772,"categoria":"Impuestos","cuenta":"VG","desc":"Monotributo"},{"id":1767571200102,"fecha":"2026-01-05","tipo":"gasto","monto":6100,"categoria":"Tarjetas/Banco","cuenta":"VG","desc":"Impuesto sello"},{"id":1767571200103,"fecha":"2026-01-05","tipo":"gasto","monto":30000,"categoria":"Transporte","cuenta":"MN","desc":"YPF nafta"},{"id":1767571200104,"fecha":"2026-01-05","tipo":"gasto","monto":63906,"categoria":"Alimentación","cuenta":"MN","desc":"Disco"},{"id":1767571200105,"fecha":"2026-01-05","tipo":"gasto","monto":50000,"categoria":"Transporte","cuenta":"MN","desc":"Nafta"},{"id":1767571200106,"fecha":"2026-01-05","tipo":"gasto","monto":10525,"categoria":"Compras","cuenta":"MN","desc":"Yenny libros"},{"id":1767571200107,"fecha":"2026-01-05","tipo":"gasto","monto":61111,"categoria":"Compras","cuenta":"MN","desc":"Lavarropas C13/18"},{"id":1767571200108,"fecha":"2026-01-05","tipo":"gasto","monto":104235,"categoria":"Transporte","cuenta":"MN","desc":"Neumáticos C12/12"},{"id":1767571200109,"fecha":"2026-01-05","tipo":"gasto","monto":41478,"categoria":"Transporte","cuenta":"MN","desc":"Aerolíneas C10/12"},{"id":1767571200110,"fecha":"2026-01-05","tipo":"gasto","monto":35809,"categoria":"Transporte","cuenta":"MN","desc":"Service auto C4/6"},{"id":1767571200111,"fecha":"2026-01-05","tipo":"gasto","monto":5371,"categoria":"Tarjetas/Banco","cuenta":"MN","desc":"Impuesto sello"},{"id":1767571200112,"fecha":"2026-01-05","tipo":"gasto","monto":39511,"categoria":"Tarjetas/Banco","cuenta":"MN","desc":"Intereses tarjeta"},{"id":1767398400113,"fecha":"2026-01-03","tipo":"gasto","monto":81200,"categoria":"Servicios del hogar","cuenta":"","desc":"Empleada del 29 al 2"},{"id":1767312000114,"fecha":"2026-01-02","tipo":"gasto","monto":32500,"categoria":"Salud","cuenta":"","desc":"T4 y calcio farmacia"},{"id":1767398400115,"fecha":"2026-01-03","tipo":"gasto","monto":36000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Almuerzo Gonza"},{"id":1767398400116,"fecha":"2026-01-03","tipo":"gasto","monto":24000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Encuentro Illia"},{"id":1767484800117,"fecha":"2026-01-04","tipo":"gasto","monto":21000,"categoria":"Actividades","cuenta":"","desc":"Padel"},{"id":1767484800118,"fecha":"2026-01-04","tipo":"gasto","monto":3000,"categoria":"Actividades","cuenta":"","desc":"Mago de los globos"},{"id":1767916800119,"fecha":"2026-01-09","tipo":"gasto","monto":30000,"categoria":"Alimentación","cuenta":"MG","desc":"Cafe Puerto Blest"},{"id":1767916800120,"fecha":"2026-01-09","tipo":"gasto","monto":120469,"categoria":"Alimentación","cuenta":"MG","desc":"Disco"},{"id":1767916800121,"fecha":"2026-01-09","tipo":"gasto","monto":5440,"categoria":"Alimentación","cuenta":"MG","desc":"Dia"},{"id":1767916800122,"fecha":"2026-01-09","tipo":"gasto","monto":26980,"categoria":"Alimentación","cuenta":"MG","desc":"Campo Verde"},{"id":1767916800123,"fecha":"2026-01-09","tipo":"gasto","monto":45758,"categoria":"Salud","cuenta":"MG","desc":"Cremas Bauza C1/3"},{"id":1767916800124,"fecha":"2026-01-09","tipo":"gasto","monto":7070,"categoria":"Compras","cuenta":"MG","desc":"Mimo C2/6"},{"id":1768262400125,"fecha":"2026-01-13","tipo":"gasto","monto":4600,"categoria":"Transporte","cuenta":"AE","desc":"Uber"},{"id":1768262400126,"fecha":"2026-01-13","tipo":"gasto","monto":38500,"categoria":"Alimentación","cuenta":"AE","desc":"Caldo Rotisería"},{"id":1768262400127,"fecha":"2026-01-13","tipo":"gasto","monto":31300,"categoria":"Salidas/Ocio","cuenta":"AE","desc":"Lobito"},{"id":1768262400128,"fecha":"2026-01-13","tipo":"gasto","monto":14318,"categoria":"Transporte","cuenta":"AE","desc":"Aerolíneas Argentinas"},{"id":1768262400129,"fecha":"2026-01-13","tipo":"gasto","monto":26000,"categoria":"Alimentación","cuenta":"AE","desc":"Cafe Puerto Blest"},{"id":1768262400130,"fecha":"2026-01-13","tipo":"gasto","monto":5490,"categoria":"Suscripciones","cuenta":"AE","desc":"Pedidos Ya Plus"},{"id":1768262400131,"fecha":"2026-01-13","tipo":"gasto","monto":79400,"categoria":"Salidas/Ocio","cuenta":"AE","desc":"Hard Rock Cafe"},{"id":1768262400132,"fecha":"2026-01-13","tipo":"gasto","monto":4305,"categoria":"Transporte","cuenta":"AE","desc":"Uber"},{"id":1768262400133,"fecha":"2026-01-13","tipo":"gasto","monto":5000,"categoria":"Transporte","cuenta":"AE","desc":"Estacionamiento"},{"id":1768262400134,"fecha":"2026-01-13","tipo":"gasto","monto":2507,"categoria":"Tarjetas/Banco","cuenta":"AE","desc":"Impuesto sello"},{"id":1767830400135,"fecha":"2026-01-08","tipo":"gasto","monto":3398,"categoria":"Transporte","cuenta":"VM","desc":"Cabify"},{"id":1767830400136,"fecha":"2026-01-08","tipo":"gasto","monto":1978,"categoria":"Transporte","cuenta":"VM","desc":"Sube"},{"id":1767830400137,"fecha":"2026-01-08","tipo":"gasto","monto":78300,"categoria":"Salud","cuenta":"VM","desc":"SportClub gym"},{"id":1767830400138,"fecha":"2026-01-08","tipo":"gasto","monto":38308,"categoria":"Servicios","cuenta":"VM","desc":"Edea Dic luz"},{"id":1767830400139,"fecha":"2026-01-08","tipo":"gasto","monto":11937,"categoria":"Tarjetas/Banco","cuenta":"VM","desc":"Impuesto sello"},{"id":1767830400140,"fecha":"2026-01-08","tipo":"gasto","monto":19727,"categoria":"Transporte","cuenta":"VM","desc":"Aerolíneas C13/18"},{"id":1767830400141,"fecha":"2026-01-08","tipo":"gasto","monto":41970,"categoria":"Compras","cuenta":"VM","desc":"Equus C2/6"},{"id":1767830400142,"fecha":"2026-01-08","tipo":"gasto","monto":13500,"categoria":"Compras","cuenta":"VM","desc":"Blanco del Once C6/6"},{"id":1767916800143,"fecha":"2026-01-09","tipo":"gasto","monto":12601,"categoria":"Suscripciones","cuenta":"MG","desc":"Apple TV"},{"id":1767916800144,"fecha":"2026-01-09","tipo":"gasto","monto":2829,"categoria":"Tarjetas/Banco","cuenta":"MG","desc":"Impuesto sello"},{"id":1767916800145,"fecha":"2026-01-09","tipo":"gasto","monto":18000,"categoria":"Actividades","cuenta":"","desc":"Vianda colonia"},{"id":1767916800146,"fecha":"2026-01-09","tipo":"gasto","monto":95360,"categoria":"Educación","cuenta":"","desc":"Guitarra Noah (64 USD)"},{"id":1767916800147,"fecha":"2026-01-09","tipo":"gasto","monto":9000,"categoria":"Alimentación","cuenta":"","desc":"Chubut cash"},{"id":1767657600148,"fecha":"2026-01-06","tipo":"gasto","monto":4500,"categoria":"Alimentación","cuenta":"","desc":"Kersen Dayu"},{"id":1767657600149,"fecha":"2026-01-06","tipo":"gasto","monto":22500,"categoria":"Alimentación","cuenta":"","desc":"Mercalito"},{"id":1767657600150,"fecha":"2026-01-06","tipo":"gasto","monto":18000,"categoria":"Salud","cuenta":"","desc":"Pañales farmacia"},{"id":1767744000151,"fecha":"2026-01-07","tipo":"gasto","monto":22000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Birra con pibas"},{"id":1767744000152,"fecha":"2026-01-07","tipo":"gasto","monto":40000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Almuerzo Oli"},{"id":1767744000153,"fecha":"2026-01-07","tipo":"gasto","monto":6400,"categoria":"Alimentación","cuenta":"","desc":"Atelier"},{"id":1767744000154,"fecha":"2026-01-07","tipo":"gasto","monto":71500,"categoria":"Servicios del hogar","cuenta":"","desc":"Empleada 4 al 7"},{"id":1767830400155,"fecha":"2026-01-08","tipo":"gasto","monto":38086,"categoria":"Servicios","cuenta":"VM","desc":"Edea Nov luz"},{"id":1767830400156,"fecha":"2026-01-08","tipo":"gasto","monto":35000,"categoria":"Compras","cuenta":"VM","desc":"Stage"},{"id":1767830400157,"fecha":"2026-01-08","tipo":"gasto","monto":56530,"categoria":"Servicios","cuenta":"VM","desc":"Flow internet/cable Dic"},{"id":1767830400158,"fecha":"2026-01-08","tipo":"gasto","monto":7836,"categoria":"Suscripciones","cuenta":"VM","desc":"Prime Video"},{"id":1767830400159,"fecha":"2026-01-08","tipo":"gasto","monto":345000,"categoria":"Servicios del hogar","cuenta":"VM","desc":"Idra jardín"},{"id":1767830400160,"fecha":"2026-01-08","tipo":"gasto","monto":21483,"categoria":"Servicios","cuenta":"VM","desc":"Camuzzi gas Dic"},{"id":1767830400161,"fecha":"2026-01-08","tipo":"gasto","monto":85004,"categoria":"Transporte","cuenta":"VM","desc":"YPF nafta"},{"id":1767830400162,"fecha":"2026-01-08","tipo":"gasto","monto":5198,"categoria":"Transporte","cuenta":"VM","desc":"Aubasa peaje"},{"id":1767830400163,"fecha":"2026-01-08","tipo":"gasto","monto":203381,"categoria":"Seguros","cuenta":"VM","desc":"Mercantil Andina seguro auto"},{"id":1767830400164,"fecha":"2026-01-08","tipo":"gasto","monto":400000,"categoria":"Vivienda","cuenta":"VM","desc":"Alquiler Blanco"},{"id":1767830400165,"fecha":"2026-01-08","tipo":"gasto","monto":622000,"categoria":"Vivienda","cuenta":"VM","desc":"Alquiler pesos"},{"id":1767830400166,"fecha":"2026-01-08","tipo":"gasto","monto":730000,"categoria":"Vivienda","cuenta":"VM","desc":"Alquiler 500 USD"},{"id":1767916800167,"fecha":"2026-01-09","tipo":"gasto","monto":4400,"categoria":"Alimentación","cuenta":"","desc":"Kersen"},{"id":1768003200168,"fecha":"2026-01-10","tipo":"gasto","monto":36600,"categoria":"Salidas/Ocio","cuenta":"","desc":"Desayuno Merci"},{"id":1768003200169,"fecha":"2026-01-10","tipo":"gasto","monto":9800,"categoria":"Salud","cuenta":"","desc":"Pañales"},{"id":1768003200170,"fecha":"2026-01-10","tipo":"gasto","monto":28000,"categoria":"Alimentación","cuenta":"","desc":"Helado Caballo Loco"},{"id":1768089600171,"fecha":"2026-01-11","tipo":"gasto","monto":10000,"categoria":"Alimentación","cuenta":"","desc":"Merci"},{"id":1768089600172,"fecha":"2026-01-11","tipo":"gasto","monto":20000,"categoria":"Alimentación","cuenta":"","desc":"Chipa"},{"id":1768089600173,"fecha":"2026-01-11","tipo":"gasto","monto":12000,"categoria":"Alimentación","cuenta":"","desc":"Atún"},{"id":1768176000174,"fecha":"2026-01-12","tipo":"gasto","monto":20500,"categoria":"Alimentación","cuenta":"","desc":"Pescadería"},{"id":1768176000175,"fecha":"2026-01-12","tipo":"gasto","monto":12200,"categoria":"Alimentación","cuenta":"","desc":"Anco"},{"id":1768176000176,"fecha":"2026-01-12","tipo":"gasto","monto":4400,"categoria":"Alimentación","cuenta":"","desc":"Shampoo"},{"id":1768176000177,"fecha":"2026-01-12","tipo":"gasto","monto":14700,"categoria":"Alimentación","cuenta":"","desc":"Kersen"},{"id":1768176000178,"fecha":"2026-01-12","tipo":"gasto","monto":104000,"categoria":"Actividades","cuenta":"","desc":"Jabad"},{"id":1768176000179,"fecha":"2026-01-12","tipo":"gasto","monto":290000,"categoria":"Familia","cuenta":"","desc":"Dayu"},{"id":1768262400180,"fecha":"2026-01-13","tipo":"gasto","monto":61000,"categoria":"Alimentación","cuenta":"","desc":"Cafe batuta 1k"},{"id":1768348800181,"fecha":"2026-01-14","tipo":"gasto","monto":4500,"categoria":"Alimentación","cuenta":"","desc":"Kersen"},{"id":1768435200182,"fecha":"2026-01-15","tipo":"gasto","monto":11200,"categoria":"Alimentación","cuenta":"","desc":"Almacén"},{"id":1768435200183,"fecha":"2026-01-15","tipo":"gasto","monto":6000,"categoria":"Actividades","cuenta":"","desc":"Colonia Jabad"},{"id":1768521600184,"fecha":"2026-01-16","tipo":"gasto","monto":13000,"categoria":"Alimentación","cuenta":"","desc":"Cafe y helado"},{"id":1768521600185,"fecha":"2026-01-16","tipo":"gasto","monto":100000,"categoria":"Vivienda","cuenta":"","desc":"Expensas"},{"id":1768521600186,"fecha":"2026-01-16","tipo":"gasto","monto":60000,"categoria":"Servicios","cuenta":"","desc":"OSSE agua enero"},{"id":1768521600187,"fecha":"2026-01-16","tipo":"gasto","monto":117000,"categoria":"Servicios del hogar","cuenta":"","desc":"Empleada 12 al 16"},{"id":1768521600188,"fecha":"2026-01-16","tipo":"gasto","monto":4000,"categoria":"Transporte","cuenta":"","desc":"Estacionamiento"},{"id":1768608000189,"fecha":"2026-01-17","tipo":"gasto","monto":44000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Da Filipo"},{"id":1768780800190,"fecha":"2026-01-19","tipo":"gasto","monto":28000,"categoria":"Alimentación","cuenta":"","desc":"Campo Verde"},{"id":1768694400191,"fecha":"2026-01-18","tipo":"gasto","monto":9500,"categoria":"Alimentación","cuenta":"","desc":"Mercalito"},{"id":1768867200192,"fecha":"2026-01-20","tipo":"gasto","monto":4500,"categoria":"Alimentación","cuenta":"","desc":"Kersen"},{"id":1768867200193,"fecha":"2026-01-20","tipo":"gasto","monto":23000,"categoria":"Actividades","cuenta":"","desc":"Batata"},{"id":1768953600194,"fecha":"2026-01-21","tipo":"gasto","monto":10200,"categoria":"Alimentación","cuenta":"","desc":"Salad Break"},{"id":1769040000195,"fecha":"2026-01-22","tipo":"gasto","monto":20000,"categoria":"Actividades","cuenta":"","desc":"Chirimollo"},{"id":1769040000196,"fecha":"2026-01-22","tipo":"gasto","monto":10400,"categoria":"Salidas/Ocio","cuenta":"","desc":"Caldo empanadas"},{"id":1769040000197,"fecha":"2026-01-22","tipo":"gasto","monto":5000,"categoria":"Actividades","cuenta":"","desc":"Patsonia"},{"id":1769040000198,"fecha":"2026-01-22","tipo":"gasto","monto":72000,"categoria":"Compras","cuenta":"","desc":"Mochila Dayu"},{"id":1769040000199,"fecha":"2026-01-22","tipo":"gasto","monto":60000,"categoria":"Compras","cuenta":"","desc":"Fotos"},{"id":1769212800200,"fecha":"2026-01-24","tipo":"gasto","monto":26000,"categoria":"Salud","cuenta":"","desc":"Pañales"},{"id":1769212800201,"fecha":"2026-01-24","tipo":"gasto","monto":14000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Propina Socarrat"},{"id":1769212800202,"fecha":"2026-01-24","tipo":"gasto","monto":5000,"categoria":"Alimentación","cuenta":"","desc":"Miramar"},{"id":1769472000203,"fecha":"2026-01-27","tipo":"gasto","monto":4000,"categoria":"Alimentación","cuenta":"","desc":"Prota"},{"id":1769558400204,"fecha":"2026-01-28","tipo":"gasto","monto":4300,"categoria":"Transporte","cuenta":"","desc":"Cabify"},{"id":1769558400205,"fecha":"2026-01-28","tipo":"gasto","monto":43000,"categoria":"Alimentación","cuenta":"","desc":"Negra Simona"},{"id":1769644800206,"fecha":"2026-01-29","tipo":"gasto","monto":8000,"categoria":"Alimentación","cuenta":"","desc":"Helga"},{"id":1769731200207,"fecha":"2026-01-30","tipo":"gasto","monto":20000,"categoria":"Alimentación","cuenta":"","desc":"Dietética"},{"id":1769731200208,"fecha":"2026-01-30","tipo":"gasto","monto":2000,"categoria":"Alimentación","cuenta":"","desc":"Pan"},{"id":1769731200209,"fecha":"2026-01-30","tipo":"gasto","monto":110000,"categoria":"Servicios del hogar","cuenta":"","desc":"Empleada 26 al 30"},{"id":1769817600210,"fecha":"2026-01-31","tipo":"gasto","monto":6200,"categoria":"Transporte","cuenta":"","desc":"Uber"},{"id":1769817600211,"fecha":"2026-01-31","tipo":"gasto","monto":50000,"categoria":"Alimentación","cuenta":"","desc":"Lima Linda"},{"id":1769817600212,"fecha":"2026-01-31","tipo":"gasto","monto":16900,"categoria":"Salidas/Ocio","cuenta":"","desc":"Dean and Denis"},{"id":1769990400085,"fecha":"2026-02-02","tipo":"gasto","monto":41478,"categoria":"Transporte","cuenta":"MN","desc":"Aerolíneas C11/12"},{"id":1769990400086,"fecha":"2026-02-02","tipo":"gasto","monto":35809,"categoria":"Transporte","cuenta":"MN","desc":"Service auto C5/6"},{"id":1770336000087,"fecha":"2026-02-06","tipo":"gasto","monto":7070,"categoria":"Compras","cuenta":"MG","desc":"Mimo C3/6"},{"id":1770336000088,"fecha":"2026-02-06","tipo":"gasto","monto":19727,"categoria":"Transporte","cuenta":"VM","desc":"Aerolíneas C14/18"},{"id":1770336000089,"fecha":"2026-02-06","tipo":"gasto","monto":41970,"categoria":"Compras","cuenta":"VM","desc":"Equus C3/6"},{"id":1769990400090,"fecha":"2026-02-02","tipo":"gasto","monto":37562,"categoria":"Turismo","cuenta":"VG","desc":"Pinamar beach resort C10/12"},{"id":1770336000091,"fecha":"2026-02-06","tipo":"gasto","monto":45758,"categoria":"Salud","cuenta":"MG","desc":"Cremas Bauza C2/3"},{"id":1770163200092,"fecha":"2026-02-04","tipo":"gasto","monto":50000,"categoria":"Transporte","cuenta":"MN","desc":"Shell nafta"},{"id":1770163200093,"fecha":"2026-02-04","tipo":"gasto","monto":18200,"categoria":"Alimentación","cuenta":"MN","desc":"Miramar"},{"id":1770163200094,"fecha":"2026-02-04","tipo":"gasto","monto":172986,"categoria":"Alimentación","cuenta":"MN","desc":"Disco"},{"id":1770163200095,"fecha":"2026-02-04","tipo":"gasto","monto":61111,"categoria":"Compras","cuenta":"MN","desc":"On City C14/18"},{"id":1769990400096,"fecha":"2026-02-02","tipo":"gasto","monto":68000,"categoria":"Impuestos","cuenta":"VG","desc":"Matrícula Diciembre"},{"id":1769990400097,"fecha":"2026-02-02","tipo":"gasto","monto":11280,"categoria":"Alimentación","cuenta":"VG","desc":"Anco"},{"id":1769990400098,"fecha":"2026-02-02","tipo":"gasto","monto":15990,"categoria":"Alimentación","cuenta":"VG","desc":"Coronados"},{"id":1769990400099,"fecha":"2026-02-02","tipo":"gasto","monto":10990,"categoria":"Alimentación","cuenta":"VG","desc":"Bocados Maestros"},{"id":1769990400100,"fecha":"2026-02-02","tipo":"gasto","monto":18399,"categoria":"Suscripciones","cuenta":"VG","desc":"Mercado Libre"},{"id":1769990400101,"fecha":"2026-02-02","tipo":"gasto","monto":11000,"categoria":"Alimentación","cuenta":"VG","desc":"Anco"},{"id":1769990400102,"fecha":"2026-02-02","tipo":"gasto","monto":52772,"categoria":"Impuestos","cuenta":"VG","desc":"Monotributo"},{"id":1770336000103,"fecha":"2026-02-06","tipo":"gasto","monto":57554,"categoria":"Alimentación","cuenta":"MG","desc":"Verdulería"},{"id":1770336000104,"fecha":"2026-02-06","tipo":"gasto","monto":80056,"categoria":"Alimentación","cuenta":"MG","desc":"Verdulería"},{"id":1770336000105,"fecha":"2026-02-06","tipo":"gasto","monto":22550,"categoria":"Alimentación","cuenta":"MG","desc":"La Rapita"},{"id":1770336000106,"fecha":"2026-02-06","tipo":"gasto","monto":2556,"categoria":"Tarjetas/Banco","cuenta":"MG","desc":"Impuesto sello"},{"id":1770336000107,"fecha":"2026-02-06","tipo":"gasto","monto":7853,"categoria":"Suscripciones","cuenta":"VM","desc":"Prime Video"},{"id":1770336000108,"fecha":"2026-02-06","tipo":"gasto","monto":58210,"categoria":"Servicios","cuenta":"VM","desc":"Personal Flow internet"},{"id":1770336000109,"fecha":"2026-02-06","tipo":"gasto","monto":18100,"categoria":"Alimentación","cuenta":"VM","desc":"Aquaro"},{"id":1770336000110,"fecha":"2026-02-06","tipo":"gasto","monto":345000,"categoria":"Servicios del hogar","cuenta":"VM","desc":"Idra jardín"},{"id":1770336000111,"fecha":"2026-02-06","tipo":"gasto","monto":21483,"categoria":"Servicios","cuenta":"VM","desc":"Camuzzi gas enero"},{"id":1770336000112,"fecha":"2026-02-06","tipo":"gasto","monto":205632,"categoria":"Seguros","cuenta":"VM","desc":"Seguro auto"},{"id":1770336000113,"fecha":"2026-02-06","tipo":"gasto","monto":78300,"categoria":"Salud","cuenta":"VM","desc":"SportClub gym"},{"id":1770336000114,"fecha":"2026-02-06","tipo":"gasto","monto":14000,"categoria":"Alimentación","cuenta":"VM","desc":"Almacén"},{"id":1770336000115,"fecha":"2026-02-06","tipo":"gasto","monto":100000,"categoria":"Transporte","cuenta":"VM","desc":"YPF nafta"},{"id":1770336000116,"fecha":"2026-02-06","tipo":"gasto","monto":1300,"categoria":"Transporte","cuenta":"VM","desc":"Estacionamiento"},{"id":1770336000117,"fecha":"2026-02-06","tipo":"gasto","monto":49499,"categoria":"Servicios","cuenta":"VM","desc":"Edea luz enero"},{"id":1770336000118,"fecha":"2026-02-06","tipo":"gasto","monto":14262,"categoria":"Tarjetas/Banco","cuenta":"VM","desc":"Impuesto sello"},{"id":1770076800119,"fecha":"2026-02-03","tipo":"gasto","monto":10400,"categoria":"Alimentación","cuenta":"","desc":"Kersen"},{"id":1770076800120,"fecha":"2026-02-03","tipo":"gasto","monto":27472,"categoria":"Alimentación","cuenta":"","desc":"New Garden"},{"id":1770336000121,"fecha":"2026-02-06","tipo":"gasto","monto":120150,"categoria":"Servicios del hogar","cuenta":"","desc":"Empleada del 2 al 6"},{"id":1770336000122,"fecha":"2026-02-06","tipo":"gasto","monto":21000,"categoria":"Alimentación","cuenta":"","desc":"Little"},{"id":1770422400123,"fecha":"2026-02-07","tipo":"gasto","monto":29000,"categoria":"Actividades","cuenta":"","desc":"Granja"},{"id":1770422400124,"fecha":"2026-02-07","tipo":"gasto","monto":8000,"categoria":"Transporte","cuenta":"","desc":"Estacionamiento"},{"id":1770422400125,"fecha":"2026-02-07","tipo":"gasto","monto":43000,"categoria":"Actividades","cuenta":"","desc":"Parque Mogotes"},{"id":1770422400126,"fecha":"2026-02-07","tipo":"gasto","monto":42000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Cena Mogotes"},{"id":1770508800127,"fecha":"2026-02-08","tipo":"gasto","monto":9500,"categoria":"Alimentación","cuenta":"","desc":"Churros Galles"},{"id":1770508800128,"fecha":"2026-02-08","tipo":"gasto","monto":8000,"categoria":"Alimentación","cuenta":"","desc":"Almacén"},{"id":1770768000129,"fecha":"2026-02-11","tipo":"gasto","monto":4900,"categoria":"Transporte","cuenta":"","desc":"Cabify"},{"id":1770595200130,"fecha":"2026-02-09","tipo":"gasto","monto":1728000,"categoria":"Vivienda","cuenta":"","desc":"Alquiler febrero"},{"id":1770940800131,"fecha":"2026-02-13","tipo":"gasto","monto":18000,"categoria":"Alimentación","cuenta":"","desc":"Cafe budín agua"},{"id":1771027200132,"fecha":"2026-02-14","tipo":"gasto","monto":100000,"categoria":"Vivienda","cuenta":"","desc":"Expensas"},{"id":1771027200133,"fecha":"2026-02-14","tipo":"gasto","monto":60000,"categoria":"Servicios","cuenta":"","desc":"OSSE agua"},{"id":1771027200134,"fecha":"2026-02-14","tipo":"gasto","monto":110000,"categoria":"Servicios del hogar","cuenta":"","desc":"Empleada 9 al 13"},{"id":1771113600135,"fecha":"2026-02-15","tipo":"gasto","monto":32000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Franks Grill"},{"id":1771113600136,"fecha":"2026-02-15","tipo":"gasto","monto":25000,"categoria":"Compras","cuenta":"","desc":"Peluquería"},{"id":1771200000137,"fecha":"2026-02-16","tipo":"gasto","monto":13600,"categoria":"Alimentación","cuenta":"","desc":"Blanca café"},{"id":1771200000138,"fecha":"2026-02-16","tipo":"gasto","monto":41000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Blanca desayuno"},{"id":1771200000139,"fecha":"2026-02-16","tipo":"gasto","monto":14000,"categoria":"Actividades","cuenta":"","desc":"Bote"},{"id":1771372800140,"fecha":"2026-02-18","tipo":"gasto","monto":50000,"categoria":"Alimentación","cuenta":"","desc":"Verdulería"},{"id":1771459200141,"fecha":"2026-02-19","tipo":"gasto","monto":65000,"categoria":"Compras","cuenta":"","desc":"Torta cumple"},{"id":1771459200142,"fecha":"2026-02-19","tipo":"gasto","monto":49000,"categoria":"Compras","cuenta":"","desc":"Bebidas cumple"},{"id":1771545600143,"fecha":"2026-02-20","tipo":"gasto","monto":12500,"categoria":"Alimentación","cuenta":"","desc":"Cafe y barrita"},{"id":1771545600144,"fecha":"2026-02-20","tipo":"gasto","monto":3500,"categoria":"Actividades","cuenta":"","desc":"Calesita"},{"id":1771632000145,"fecha":"2026-02-21","tipo":"gasto","monto":40000,"categoria":"Salidas/Ocio","cuenta":"","desc":"Merci"},{"id":1771718400146,"fecha":"2026-02-22","tipo":"gasto","monto":15000,"categoria":"Actividades","cuenta":"","desc":"Batata"},{"id":1771718400147,"fecha":"2026-02-22","tipo":"gasto","monto":12000,"categoria":"Alimentación","cuenta":"","desc":"Viccini"},{"id":1771718400148,"fecha":"2026-02-22","tipo":"gasto","monto":3500,"categoria":"Compras","cuenta":"","desc":"Cinta"},{"id":1771545600149,"fecha":"2026-02-20","tipo":"gasto","monto":65000,"categoria":"Servicios del hogar","cuenta":"","desc":"Empleada 15 al 20"}];
+
+let datos=[], grupos=JSON.parse(JSON.stringify(GRUPOS_DEFAULT)), periodos=JSON.parse(JSON.stringify(PERIODOS_DEFAULT));
+let mesDash='2026-02', mesCat='2026-02', mesRes='2026-03';
+let currentUser=null, migracionHecha=false;
+let unsubMovs=null, unsubConfig=null;
+
+function setSyncStatus(txt, color='var(--text2)'){
+  const el=document.getElementById('sync-status');
+  if(el)el.innerHTML=`<span style="color:${color}">${txt}</span>`;
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, user=>{
+  if(user && EMAILS_OK.includes(user.email)){
+    currentUser=user;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('user-email').textContent=user.email;
+    iniciarListeners();
+  } else if(user){
+    // Email no autorizado
+    signOut(auth);
+    mostrarError('Email no autorizado: '+user.email);
+  } else {
+    currentUser=null;
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('app').style.display='none';
+    if(unsubMovs){unsubMovs();unsubMovs=null;}
+    if(unsubConfig){unsubConfig();unsubConfig=null;}
+  }
+});
+
+document.getElementById('btn-google-login').onclick=async()=>{
+  try{
+    await signInWithPopup(auth, provider);
+  } catch(e){
+    mostrarError('Error al iniciar sesión: '+e.message);
+  }
+};
+
+function mostrarError(msg){
+  const el=document.getElementById('login-error');
+  el.textContent=msg;el.style.display='block';
+}
+
+window.cerrarSesion=()=>signOut(auth);
+
+function iniciarListeners(){
+  setSyncStatus('● Conectando...','var(--accent3)');
+  unsubMovs=onSnapshot(collection(db,'movimientos'),snap=>{
+    datos=snap.docs.map(d=>{const data=d.data();return{...data,_fbId:d.id};});
+    if(datos.length===0&&!migracionHecha){migracionHecha=true;migrarHistorico();}
+    setSyncStatus('● Sincronizado','var(--accent)');
+    renderAll();
+  },err=>{setSyncStatus('● Sin conexión','var(--danger)');});
+  unsubConfig=onSnapshot(doc(db,'config','grupos'),snap=>{if(snap.exists())grupos=snap.data().grupos;});
+  onSnapshot(doc(db,'config','periodos'),snap=>{if(snap.exists())periodos=snap.data().periodos;});
+}
+
+async function migrarHistorico(){
+  const batch=BRUTOS.map(d=>{
+    const cat=remapear(d);
+    const mr=calcularMesResumen(d.fecha,d.cuenta,periodos);
+    return addDoc(collection(db,'movimientos'),{...d,categoria:cat,mesResumen:mr,quien:'VM'});
+  });
+  await Promise.all(batch);
+}
+
+async function guardarConfig(){
+  await setDoc(doc(db,'config','grupos'),{grupos});
+  await setDoc(doc(db,'config','periodos'),{periodos});
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+function getGastosImpacto(mes){return datos.filter(d=>d.tipo==='gasto'&&d.mesResumen===mes);}
+function getMes(m){return datos.filter(d=>d.fecha&&d.fecha.startsWith(m));}
+function getMeses(){return[...new Set(datos.filter(d=>d.fecha).map(d=>d.fecha.slice(0,7)))].sort();}
+function getMesesResumen(){const s=new Set(datos.filter(d=>d.tipo==='gasto'&&d.mesResumen).map(d=>d.mesResumen));return[...s].sort();}
+function quienBadge(q){return q==='Dayu'?`<span class="quien-badge quien-dayu">Dayu</span>`:`<span class="quien-badge quien-vm">VM</span>`;}
+
+function navTo(page,el){
+  document.querySelectorAll('.page-section').forEach(p=>p.style.display='none');
+  document.getElementById('page-'+page).style.display='block';
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderAll();
+}
+window.navTo=navTo;
+
+function renderAll(){
+  renderMesTabs();renderKPIs();renderSplit();renderCharts();renderRecientes();
+  renderMovimientos();renderResumenes();renderConfigTarjetas();renderCategorias();renderComparativa();renderConfig();
+}
+
+function renderMesTabs(){
+  const meses=getMeses(),mesesRes=getMesesResumen();
+  [['mes-tabs-dash',mesDash,'setMesDash'],['mes-tabs-cat',mesCat,'setMesCat']].forEach(([id,cur,fn])=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=meses.map(m=>`<div class="mes-tab ${m===cur?'active':''}" onclick="window.${fn}('${m}')">${NOMBRES_MES[m]||m}</div>`).join('');
+  });
+  const elRes=document.getElementById('mes-tabs-res');
+  if(elRes)elRes.innerHTML=mesesRes.map(m=>`<div class="mes-tab ${m===mesRes?'active':''}" onclick="window.setMesRes('${m}')">${NOMBRES_MES[m]||m}</div>`).join('');
+}
+window.setMesDash=m=>{mesDash=m;renderAll();};
+window.setMesCat=m=>{mesCat=m;renderAll();};
+window.setMesRes=m=>{mesRes=m;renderAll();};
+
+function renderKPIs(){
+  const ing=getMes(mesDash).filter(d=>d.tipo==='ingreso').reduce((s,d)=>s+d.monto,0);
+  const gas=getGastosImpacto(mesDash).reduce((s,d)=>s+d.monto,0);
+  const fijo=getGastosImpacto(mesDash).filter(d=>getCatGrupo(d.categoria,grupos)?.id==='fijo').reduce((s,d)=>s+d.monto,0);
+  const bal=ing-gas;
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi green"><div class="kpi-label">Ingresos</div><div class="kpi-value" style="color:var(--accent)">${fmt(ing)}</div><div class="kpi-sub">del mes</div></div>
+    <div class="kpi red"><div class="kpi-label">Gastos (impacto)</div><div class="kpi-value" style="color:var(--danger)">${fmt(gas)}</div><div class="kpi-sub">${ing>0?Math.round(gas/ing*100):0}% del ingreso</div></div>
+    <div class="kpi blue"><div class="kpi-label">Gastos fijos</div><div class="kpi-value" style="color:var(--accent2)">${fmt(fijo)}</div><div class="kpi-sub">${gas>0?Math.round(fijo/gas*100):0}% del gasto</div></div>
+    <div class="kpi ${bal>=0?'green':'red'}"><div class="kpi-label">Balance</div><div class="kpi-value" style="color:${bal>=0?'var(--accent)':'var(--danger)'}">${fmt(bal)}</div><div class="kpi-sub">${bal>=0?'✓ Superávit':'⚠ Déficit'}</div></div>`;
+}
+
+function renderSplit(){
+  const mv=getGastosImpacto(mesDash);
+  const f=mv.filter(d=>getCatGrupo(d.categoria,grupos)?.id==='fijo').reduce((s,d)=>s+d.monto,0);
+  const v=mv.filter(d=>getCatGrupo(d.categoria,grupos)?.id==='variable').reduce((s,d)=>s+d.monto,0);
+  const fi=mv.filter(d=>getCatGrupo(d.categoria,grupos)?.id==='financiero').reduce((s,d)=>s+d.monto,0);
+  const t=f+v+fi||1;
+  document.getElementById('split-cards').innerHTML=`
+    <div class="split-card"><h4 style="color:var(--accent2)">🔵 Fijos</h4><div style="font-size:22px;font-weight:800;color:var(--accent2);letter-spacing:-1px">${fmt(f)}</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:4px">${Math.round(f/t*100)}%</div></div>
+    <div class="split-card"><h4 style="color:var(--accent3)">🟡 Variables</h4><div style="font-size:22px;font-weight:800;color:var(--accent3);letter-spacing:-1px">${fmt(v)}</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:4px">${Math.round(v/t*100)}%</div></div>
+    <div class="split-card"><h4 style="color:#a78bfa">🟣 Fin/Salud</h4><div style="font-size:22px;font-weight:800;color:#a78bfa;letter-spacing:-1px">${fmt(fi)}</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:4px">${Math.round(fi/t*100)}%</div></div>`;
+}
+
+function renderCharts(){
+  const mv=getGastosImpacto(mesDash);
+  const cm={};mv.forEach(d=>{cm[d.categoria]=(cm[d.categoria]||0)+d.monto;});
+  const sorted=Object.entries(cm).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxV=sorted[0]?.[1]||1;
+  document.getElementById('chart-cat').innerHTML=sorted.map(([c,v])=>`<div class="bar-row"><div class="bar-label">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${v/maxV*100}%;background:${getCatColor(c,grupos)}"></div></div><div class="bar-val">${fmt(v)}</div></div>`).join('')||'<div class="empty-state">Sin datos</div>';
+  const meses=getMeses();
+  const maxIG=Math.max(...meses.map(m=>Math.max(getMes(m).filter(d=>d.tipo==='ingreso').reduce((s,d)=>s+d.monto,0),getGastosImpacto(m).reduce((s,d)=>s+d.monto,0))),1);
+  document.getElementById('chart-ing-gas').innerHTML=meses.map(m=>{
+    const ing=getMes(m).filter(d=>d.tipo==='ingreso').reduce((s,d)=>s+d.monto,0);
+    const gas=getGastosImpacto(m).reduce((s,d)=>s+d.monto,0);
+    return`<div style="margin-bottom:8px"><div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:3px">${NOMBRES_MES[m]||m}</div><div class="bar-row" style="margin-bottom:2px"><div class="bar-label" style="color:var(--accent)">Ingresos</div><div class="bar-track"><div class="bar-fill" style="width:${ing/maxIG*100}%;background:var(--accent)"></div></div><div class="bar-val">${fmt(ing)}</div></div><div class="bar-row"><div class="bar-label" style="color:var(--danger)">Gastos</div><div class="bar-track"><div class="bar-fill" style="width:${gas/maxIG*100}%;background:var(--danger)"></div></div><div class="bar-val">${fmt(gas)}</div></div></div>`;
+  }).join('');
+}
+
+function renderRecientes(){
+  const rec=[...datos].filter(d=>d.tipo==='gasto').sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).slice(0,10);
+  const el=document.getElementById('tbody-recientes');if(!el)return;
+  el.innerHTML=rec.map(d=>{
+    const t=d.cuenta&&TARJETAS_META[d.cuenta];
+    return`<tr><td class="text-mono" style="color:var(--text2);font-size:11px">${d.fecha}</td><td>${quienBadge(d.quien)}</td><td>${d.desc}</td><td><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${getCatColor(d.categoria,grupos)};margin-right:5px"></span>${d.categoria}</td><td>${t?`<span style="color:${t.color};font-family:'DM Mono',monospace;font-weight:700">${d.cuenta}</span>`:'-'}</td><td>${d.cuenta?`<span class="resumen-badge">${NOMBRES_MES_L[d.mesResumen]||d.mesResumen||'-'}</span>`:'-'}</td><td class="monto-negativo">-${fmt(d.monto)}</td></tr>`;
+  }).join('')||'<tr><td colspan="7" class="empty-state">Cargando...</td></tr>';
+}
+
+function renderMovimientos(){
+  const fM=document.getElementById('fil-mes')?.value||'';
+  const fT=document.getElementById('fil-tipo')?.value||'';
+  const fQ=document.getElementById('fil-quien')?.value||'';
+  const fC=document.getElementById('fil-cat')?.value||'';
+  const fTar=document.getElementById('fil-tarjeta')?.value||'';
+  const fB=document.getElementById('fil-buscar')?.value.toLowerCase()||'';
+  let mv=[...datos].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  if(fM)mv=mv.filter(d=>d.fecha&&d.fecha.startsWith(fM));
+  if(fT)mv=mv.filter(d=>d.tipo===fT);
+  if(fQ)mv=mv.filter(d=>d.quien===fQ);
+  if(fC)mv=mv.filter(d=>d.categoria===fC);
+  if(fTar){if(fTar==='efectivo')mv=mv.filter(d=>!d.cuenta);else mv=mv.filter(d=>d.cuenta===fTar);}
+  if(fB)mv=mv.filter(d=>(d.desc||'').toLowerCase().includes(fB)||(d.categoria||'').toLowerCase().includes(fB));
+  const tot=mv.reduce((s,d)=>s+(d.tipo==='ingreso'?d.monto:-d.monto),0);
+  document.getElementById('mov-count').textContent=`${mv.length} movimientos`;
+  document.getElementById('mov-total').textContent=`Balance: ${tot>=0?'+':''}${fmt(tot)}`;
+  const tbody=document.getElementById('tbody-movimientos');if(!tbody)return;
+  tbody.innerHTML=mv.map(d=>{
+    const t=d.cuenta&&TARJETAS_META[d.cuenta];
+    return`<tr><td class="text-mono" style="color:var(--text2);font-size:11px">${d.fecha}</td><td>${quienBadge(d.quien)}</td><td>${d.desc}</td><td><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${getCatColor(d.categoria,grupos)};margin-right:5px"></span>${d.categoria}</td><td>${t?`<span style="color:${t.color};font-family:'DM Mono',monospace;font-weight:700">${d.cuenta}</span>`:'-'}</td><td>${d.cuenta&&d.tipo==='gasto'?`<span class="resumen-badge">${NOMBRES_MES_L[d.mesResumen]||'-'}</span>`:'-'}</td><td class="${d.tipo==='ingreso'?'monto-positivo':'monto-negativo'}">${d.tipo==='ingreso'?'+':'-'}${fmt(d.monto)}</td><td><button class="btn-icon" onclick="window.eliminar('${d._fbId}')">✕</button></td></tr>`;
+  }).join('')||'<tr><td colspan="8" class="empty-state">Sin resultados</td></tr>';
+}
+
+function renderResumenes(){
+  const el=document.getElementById('info-resumenes');if(el)el.innerHTML=`<strong>Resúmenes de ${NOMBRES_MES_L[mesRes]||mesRes}</strong> — lo que vence este mes`;
+  const grid=document.getElementById('tarjetas-grid'),hoy=new Date();
+  if(grid){grid.innerHTML=Object.entries(TARJETAS_META).map(([id,tc])=>{
+    const gastos=datos.filter(d=>d.tipo==='gasto'&&d.mesResumen===mesRes&&d.cuenta===id);
+    const total=gastos.reduce((s,d)=>s+d.monto,0);
+    const p=periodos[id]&&periodos[id][mesRes];
+    let vtoLabel='Sin período',vtoClass='vto-ok';
+    if(p){const vtoDate=new Date(p.vto+'T12:00:00');const diff=Math.ceil((vtoDate-hoy)/(1000*60*60*24));if(diff<0){vtoLabel=`Venció hace ${Math.abs(diff)}d`;vtoClass='vto-urgente';}else if(diff===0){vtoLabel='Vence hoy';vtoClass='vto-urgente';}else if(diff<=5){vtoLabel=`Vence en ${diff}d`;vtoClass='vto-urgente';}else if(diff<=10){vtoLabel=`Vence en ${diff}d`;vtoClass='vto-pronto';}else{vtoLabel=`Vence ${p.vto.slice(8,10)}/${p.vto.slice(5,7)}`;vtoClass='vto-ok';}}
+    return`<div class="tarjeta-card tc-${id}"><div class="tarjeta-nombre">${id} · ${tc.nombre}</div><div class="tarjeta-info">${p?'Cierre '+p.cierre.slice(8,10)+'/'+p.cierre.slice(5,7):'—'} · ${gastos.length} gastos</div><div class="tarjeta-monto" style="color:${total>0?'var(--danger)':'var(--text2)'}">${total>0?fmt(total):'$0'}</div><span class="tarjeta-vto ${vtoClass}">${vtoLabel}</span></div>`;
+  }).join('');}
+  const gm=datos.filter(d=>d.tipo==='gasto'&&d.mesResumen===mesRes).sort((a,b)=>(a.cuenta||'').localeCompare(b.cuenta||''));
+  const total=gm.reduce((s,d)=>s+d.monto,0);
+  const tit=document.getElementById('res-titulo');if(tit)tit.textContent=`Detalle · ${NOMBRES_MES_L[mesRes]||mesRes} · Total: ${fmt(total)}`;
+  const tbody=document.getElementById('tbody-resumenes');if(!tbody)return;
+  tbody.innerHTML=gm.map(d=>{const t=TARJETAS_META[d.cuenta];return`<tr><td class="text-mono" style="color:var(--text2);font-size:11px">${d.fecha}</td><td>${quienBadge(d.quien)}</td><td>${d.desc}</td><td><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${getCatColor(d.categoria,grupos)};margin-right:5px"></span>${d.categoria}</td><td>${t?`<span style="color:${t.color};font-family:'DM Mono',monospace;font-weight:700">${d.cuenta}</span>`:'Efec/Déb'}</td><td class="monto-negativo">-${fmt(d.monto)}</td></tr>`;}).join('')||'<tr><td colspan="6" class="empty-state">Sin gastos</td></tr>';
+}
+
+function renderConfigTarjetas(){
+  const el=document.getElementById('config-tarjetas-content');if(!el)return;
+  const mm=[...new Set([...getMeses(),...getMesesResumen()])].sort().slice(0,12);
+  el.innerHTML=Object.entries(TARJETAS_META).map(([id,tc])=>{
+    const rows=mm.map(mes=>{const p=(periodos[id]&&periodos[id][mes])||{cierre:'',vto:''};return`<tr><td style="font-weight:700;color:var(--text)">${NOMBRES_MES_L[mes]||mes}</td><td><input type="date" value="${p.cierre}" onchange="window.updatePeriodo('${id}','${mes}','cierre',this.value)"></td><td><input type="date" value="${p.vto}" onchange="window.updatePeriodo('${id}','${mes}','vto',this.value)"></td></tr>`;}).join('');
+    return`<div class="settings-section"><h3 style="color:${tc.color}">${id} · ${tc.nombre}</h3><table class="periodos-table"><thead><tr><th>Mes</th><th>Cierre</th><th>Vencimiento</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }).join('');
+}
+window.updatePeriodo=async(tarjetaId,mes,campo,valor)=>{
+  if(!periodos[tarjetaId])periodos[tarjetaId]={};
+  if(!periodos[tarjetaId][mes])periodos[tarjetaId][mes]={cierre:'',vto:''};
+  periodos[tarjetaId][mes][campo]=valor;
+  const afectados=datos.filter(d=>d.cuenta===tarjetaId&&d.tipo==='gasto');
+  for(const d of afectados){
+    const nuevoMr=calcularMesResumen(d.fecha,d.cuenta,periodos);
+    if(nuevoMr!==d.mesResumen)await setDoc(doc(db,'movimientos',d._fbId),{...d,mesResumen:nuevoMr},{merge:true});
+  }
+  await guardarConfig();
+};
+
+function renderCategorias(){
+  const mv=getGastosImpacto(mesCat);
+  const cm={};mv.forEach(d=>{if(!cm[d.categoria])cm[d.categoria]={total:0,count:0};cm[d.categoria].total+=d.monto;cm[d.categoria].count++;});
+  const totG=Object.values(cm).reduce((s,v)=>s+v.total,0)||1;
+  const fc=Object.entries(cm).filter(([c])=>getCatGrupo(c,grupos)?.id==='fijo').sort((a,b)=>b[1].total-a[1].total);
+  const vc=Object.entries(cm).filter(([c])=>getCatGrupo(c,grupos)?.id==='variable').sort((a,b)=>b[1].total-a[1].total);
+  const mF=fc[0]?.[1].total||1,mV=vc[0]?.[1].total||1;
+  document.getElementById('chart-fijos').innerHTML=fc.map(([c,v])=>`<div class="bar-row"><div class="bar-label">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${v.total/mF*100}%;background:${getCatColor(c,grupos)}"></div></div><div class="bar-val">${fmt(v.total)}</div></div>`).join('')||'<div class="empty-state">Sin datos</div>';
+  document.getElementById('chart-variables').innerHTML=vc.map(([c,v])=>`<div class="bar-row"><div class="bar-label">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${v.total/mV*100}%;background:${getCatColor(c,grupos)}"></div></div><div class="bar-val">${fmt(v.total)}</div></div>`).join('')||'<div class="empty-state">Sin datos</div>';
+  const GL={fijo:'Fijo',variable:'Variable',financiero:'Fin/Salud'};
+  document.getElementById('tbody-cat').innerHTML=Object.entries(cm).sort((a,b)=>b[1].total-a[1].total).map(([c,v])=>{const g=getCatGrupo(c,grupos);return`<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${getCatColor(c,grupos)};margin-right:8px"></span>${c}</td><td>${g?`<span class="grupo-tag grupo-${g.id}">${GL[g.id]||g.id}</span>`:''}</td><td class="text-mono">${v.count}</td><td class="monto-negativo">-${fmt(v.total)}</td><td class="text-mono" style="color:var(--text2)">${Math.round(v.total/totG*100)}%</td></tr>`;}).join('')||'<tr><td colspan="5" class="empty-state">Sin datos</td></tr>';
+}
+
+function renderComparativa(){
+  const meses=getMeses();
+  const stats=meses.map(m=>{const mv=getMes(m);const ing=mv.filter(d=>d.tipo==='ingreso').reduce((s,d)=>s+d.monto,0);const gas=getGastosImpacto(m).reduce((s,d)=>s+d.monto,0);const fijo=getGastosImpacto(m).filter(d=>getCatGrupo(d.categoria,grupos)?.id==='fijo').reduce((s,d)=>s+d.monto,0);const vari=getGastosImpacto(m).filter(d=>getCatGrupo(d.categoria,grupos)?.id==='variable').reduce((s,d)=>s+d.monto,0);return{mes:m,nombre:NOMBRES_MES[m]||m,ing,gas,bal:ing-gas,fijo,vari};});
+  const el=document.getElementById('kpis-comp');
+  if(el&&stats.length>=2){const last=stats[stats.length-1],prev=stats[stats.length-2],dG=last.gas-prev.gas;el.innerHTML=`<div class="kpi green"><div class="kpi-label">Ingresos ${last.nombre}</div><div class="kpi-value" style="color:var(--accent)">${fmt(last.ing)}</div><div class="kpi-sub">vs ${fmt(prev.ing)}</div></div><div class="kpi ${dG>0?'red':'green'}"><div class="kpi-label">Gastos ${last.nombre}</div><div class="kpi-value" style="color:${dG>0?'var(--danger)':'var(--accent)'}">${fmt(last.gas)}</div><div class="kpi-sub">${dG>0?'↑':'↓'} ${fmt(Math.abs(dG))}</div></div><div class="kpi ${last.bal>=0?'green':'red'}"><div class="kpi-label">Balance</div><div class="kpi-value" style="color:${last.bal>=0?'var(--accent)':'var(--danger)'}">${fmt(last.bal)}</div><div class="kpi-sub">${last.bal>=0?'Superávit':'Déficit'}</div></div><div class="kpi yellow"><div class="kpi-label">Fijos ${last.nombre}</div><div class="kpi-value" style="color:var(--accent3)">${fmt(last.fijo)}</div><div class="kpi-sub">vs ${fmt(prev.fijo)}</div></div>`;}
+  const mIG=Math.max(...stats.map(s=>Math.max(s.ing,s.gas)),1),mFV=Math.max(...stats.map(s=>Math.max(s.fijo,s.vari)),1);
+  const mk=(s,v1,v2,c1,c2,l1,l2,max)=>`<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;margin-bottom:3px">${s.nombre}</div><div class="bar-row" style="margin-bottom:2px"><div class="bar-label" style="color:${c1}">${l1}</div><div class="bar-track"><div class="bar-fill" style="width:${v1/max*100}%;background:${c1}"></div></div><div class="bar-val">${fmt(v1)}</div></div><div class="bar-row"><div class="bar-label" style="color:${c2}">${l2}</div><div class="bar-track"><div class="bar-fill" style="width:${v2/max*100}%;background:${c2}"></div></div><div class="bar-val">${fmt(v2)}</div></div></div>`;
+  const el1=document.getElementById('chart-comp1');if(el1)el1.innerHTML=stats.map(s=>mk(s,s.ing,s.gas,'var(--accent)','var(--danger)','Ingresos','Gastos',mIG)).join('');
+  const el2=document.getElementById('chart-comp2');if(el2)el2.innerHTML=stats.map(s=>mk(s,s.fijo,s.vari,'var(--accent2)','var(--accent3)','Fijos','Variables',mFV)).join('');
+}
+
+function renderConfig(){
+  const el=document.getElementById('config-grupos');if(!el)return;
+  const GL={fijo:'🔵 Gastos Fijos',variable:'🟡 Gastos Variables',financiero:'🟣 Financieros / Salud',ingreso:'🟢 Ingresos'};
+  el.innerHTML=grupos.map(g=>`<div class="settings-section"><h3>${GL[g.id]||g.nombre}</h3><div class="cat-list">${g.cats.map(cat=>`<div class="cat-item"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${getCatColor(cat,grupos)}"></span><span class="cat-item-name">${cat}</span><button class="btn btn-danger btn-sm" onclick="window.eliminarCat('${g.id}','${cat.replace(/'/g,"\\'")}')" >✕</button></div>`).join('')}</div></div>`).join('');
+}
+
+function actualizarCatsFiltro(){const el=document.getElementById('fil-cat');if(!el)return;el.innerHTML='<option value="">Todas las categorías</option>'+grupos.flatMap(g=>g.cats).map(c=>`<option value="${c}">${c}</option>`).join('');}
+function actualizarCatsModal(){const tipo=document.getElementById('m-tipo')?.value||'gasto';const sel=document.getElementById('m-cat');if(!sel)return;const gs=tipo==='ingreso'?grupos.filter(g=>g.id==='ingreso'):grupos.filter(g=>g.id!=='ingreso');sel.innerHTML=gs.flatMap(g=>g.cats.map(c=>`<option value="${c}">${c}</option>`)).join('');}
+window.actualizarCatsModal=actualizarCatsModal;
+
+function calcularResumen(){
+  const fecha=document.getElementById('m-fecha')?.value,tarjeta=document.getElementById('m-cuenta')?.value,tipo=document.getElementById('m-tipo')?.value||'gasto';
+  const row=document.getElementById('resumen-info-row'),infoEl=document.getElementById('resumen-info');
+  if(!row||!infoEl)return;
+  if(tipo==='ingreso'||!tarjeta||!fecha){row.style.display='none';return;}
+  row.style.display='block';
+  const tc=TARJETAS_META[tarjeta];if(!tc){row.style.display='none';return;}
+  const info=getCierreInfo(fecha,tarjeta,periodos);
+  const mesImpacto=calcularMesResumen(fecha,tarjeta,periodos);
+  if(info){
+    const dias=Math.ceil((new Date(info.cierreStr+'T12:00:00')-new Date(fecha+'T12:00:00'))/(1000*60*60*24));
+    infoEl.className='info-box ok';
+    infoEl.innerHTML=`💳 <strong style="color:${tc.color}">${tc.nombre}</strong> · Cierre: <strong>${info.cierreStr.slice(8,10)}/${info.cierreStr.slice(5,7)}</strong> (${dias}d) · Vence: <strong>${info.vtoStr.slice(8,10)}/${info.vtoStr.slice(5,7)}</strong> → Impacta en <strong>${NOMBRES_MES_L[mesImpacto]||mesImpacto}</strong>`;
+  } else {infoEl.className='info-box warn';infoEl.innerHTML='⚠️ Sin período configurado para esta tarjeta.';}
+}
+window.calcularResumen=calcularResumen;
+
+window.abrirModal=()=>{
+  document.getElementById('m-tipo').value='gasto';actualizarCatsModal();
+  document.getElementById('m-monto').value='';document.getElementById('m-desc').value='';document.getElementById('m-cuenta').value='';
+  document.getElementById('resumen-info-row').style.display='none';
+  document.getElementById('m-fecha').value=new Date().toISOString().slice(0,10);
+  document.getElementById('modal-overlay').classList.remove('hidden');
+};
+window.cerrarModal=()=>document.getElementById('modal-overlay').classList.add('hidden');
+window.guardarMovimiento=async()=>{
+  const monto=parseFloat(document.getElementById('m-monto').value);
+  const fecha=document.getElementById('m-fecha').value;
+  const desc=document.getElementById('m-desc').value.trim();
+  const tipo=document.getElementById('m-tipo').value;
+  const cuenta=document.getElementById('m-cuenta').value;
+  if(!monto||!fecha||!desc)return alert('Completá fecha, monto y descripción');
+  const mesResumen=tipo==='gasto'?calcularMesResumen(fecha,cuenta,periodos):fecha.slice(0,7);
+  await addDoc(collection(db,'movimientos'),{fecha,tipo,monto,moneda:'ARS',categoria:document.getElementById('m-cat').value,cuenta,desc,mesResumen,quien:'VM',timestamp:Date.now()});
+  cerrarModal();
+};
+window.eliminar=async(fbId)=>{if(!confirm('¿Eliminar?'))return;await deleteDoc(doc(db,'movimientos',fbId));};
+window.agregarCategoria=async()=>{
+  const nombre=document.getElementById('new-cat-name').value.trim();const gid=document.getElementById('new-cat-grupo').value;
+  if(!nombre)return alert('Escribí un nombre');
+  const g=grupos.find(g=>g.id===gid);
+  if(g&&!g.cats.includes(nombre)){g.cats.push(nombre);await guardarConfig();actualizarCatsFiltro();actualizarCatsModal();renderConfig();}
+  else alert('Esa categoría ya existe');
+  document.getElementById('new-cat-name').value='';
+};
+window.eliminarCat=async(gid,cat)=>{
+  if(datos.some(d=>d.categoria===cat)&&!confirm(`"${cat}" tiene movimientos. ¿Eliminás igual?`))return;
+  const g=grupos.find(g=>g.id===gid);if(g){g.cats=g.cats.filter(c=>c!==cat);await guardarConfig();renderConfig();actualizarCatsFiltro();actualizarCatsModal();}
+};
+window.exportarCSV=()=>{
+  const h='Fecha,Quién,Tipo,Descripción,Categoría,Tarjeta,Resumen,Monto\n';
+  const r=[...datos].sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(d=>`${d.fecha},${d.quien||'VM'},${d.tipo},"${d.desc}",${d.categoria},${d.cuenta||'efectivo'},${d.mesResumen||''},${d.monto}`).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h+r],{type:'text/csv'}));a.download='finanzas_2026.csv';a.click();
+};
+window.onclick=e=>{if(e.target===document.getElementById('modal-overlay'))cerrarModal();};
+actualizarCatsFiltro();
+</script>
+</body>
+</html>
