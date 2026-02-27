@@ -175,30 +175,30 @@ input[type=text],input[type=date],input[type=number],select{width:100%}
       <div class="topbar"><h2>Movimientos</h2><div class="topbar-actions"><button class="btn btn-primary" onclick="abrirModal()">+ Nuevo</button><button class="btn btn-secondary" onclick="exportarCSV()">↓ CSV</button></div></div>
       <div class="page">
         <div class="filters">
-          <select id="fil-mes" onchange="renderMovimientos()">
+          <select id="fil-mes" onchange="window.renderMovimientos()">
             <option value="">Todos los meses</option>
             <option value="2026-01">Enero</option><option value="2026-02">Febrero</option><option value="2026-03">Marzo</option>
             <option value="2026-04">Abril</option><option value="2026-05">Mayo</option><option value="2026-06">Junio</option>
             <option value="2026-07">Julio</option><option value="2026-08">Agosto</option>
           </select>
-          <select id="fil-tipo" onchange="renderMovimientos()">
+          <select id="fil-tipo" onchange="window.renderMovimientos()">
             <option value="">Todos</option><option value="gasto">Gastos</option><option value="ingreso">Ingresos</option>
           </select>
-          <select id="fil-quien" onchange="renderMovimientos()">
+          <select id="fil-quien" onchange="window.renderMovimientos()">
             <option value="">Todos</option><option value="Leo">Leo</option><option value="Dayu">Dayu</option>
           </select>
-          <select id="fil-tarjeta" onchange="renderMovimientos()">
+          <select id="fil-tarjeta" onchange="window.renderMovimientos()">
             <option value="">Todas tarjetas</option>
             <option value="VG">VG</option><option value="MG">MG</option><option value="MN">MN</option>
             <option value="VM">VM</option><option value="AE">AE</option><option value="AM">AM</option>
             <option value="VGD">VGD</option><option value="MGD">MGD</option><option value="VFD">VFD</option>
             <option value="efectivo">Efectivo</option>
           </select>
-          <select id="fil-cat" onchange="renderMovimientos()"><option value="">Todas las categorías</option></select>
-          <select id="fil-cuotas" onchange="renderMovimientos()">
+          <select id="fil-cat" onchange="window.renderMovimientos()"><option value="">Todas las categorías</option></select>
+          <select id="fil-cuotas" onchange="window.renderMovimientos()">
             <option value="">Todos</option><option value="cuota">Solo cuotas</option><option value="normal">Sin cuotas</option><option value="futura">Cuotas futuras</option>
           </select>
-          <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="renderMovimientos()" style="min-width:110px">
+          <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="window.renderMovimientos()" style="min-width:110px">
         </div>
         <div class="table-wrap">
           <div class="table-header"><h3 id="mov-count"></h3><span id="mov-total" class="text-mono" style="font-size:12px;color:var(--text2)"></span></div>
@@ -274,16 +274,16 @@ input[type=text],input[type=date],input[type=number],select{width:100%}
     <h3>Nuevo movimiento</h3>
     <div class="form-grid">
       <div class="form-group form-full"><label>Tipo</label>
-        <select id="m-tipo" onchange="actualizarCatsModal();calcularResumen()">
+        <select id="m-tipo" onchange="window.actualizarCatsModal();window.calcularResumen()">
           <option value="gasto">💸 Gasto</option><option value="ingreso">💰 Ingreso</option>
         </select>
       </div>
-      <div class="form-group"><label>Fecha</label><input type="date" id="m-fecha" onchange="calcularResumen()"></div>
+      <div class="form-group"><label>Fecha</label><input type="date" id="m-fecha" onchange="window.calcularResumen()"></div>
       <div class="form-group"><label>Monto ($ARS)</label><input type="number" id="m-monto" placeholder="0"></div>
       <div class="form-group form-full"><label>Descripción</label><input type="text" id="m-desc" placeholder="Ej: Cena restorán"></div>
       <div class="form-group"><label>Categoría</label><select id="m-cat"></select></div>
       <div class="form-group"><label>Medio de pago</label>
-        <select id="m-cuenta" onchange="calcularResumen();toggleCuotas()">
+        <select id="m-cuenta" onchange="window.calcularResumen();window.toggleCuotas()">
           <option value="">Efectivo / Débito</option>
           <option value="VG">💳 VG - Visa Galicia (Leo)</option>
           <option value="MG">💳 MG - MC Galicia (Leo)</option>
@@ -298,7 +298,7 @@ input[type=text],input[type=date],input[type=number],select{width:100%}
       </div>
       <div class="form-group form-full" id="cuotas-row" style="display:none">
         <label>Cuotas</label>
-        <select id="m-cuotas" onchange="calcularResumen()">
+        <select id="m-cuotas" onchange="window.calcularResumen()">
           <option value="1">1 cuota (pago único)</option>
           <option value="2">2 cuotas</option><option value="3">3 cuotas</option><option value="4">4 cuotas</option>
           <option value="5">5 cuotas</option><option value="6">6 cuotas</option><option value="9">9 cuotas</option>
@@ -739,6 +739,12 @@ window.exportarCSV=()=>{
 };
 window.onclick=e=>{if(e.target===document.getElementById('modal-overlay'))cerrarModal();};
 actualizarCatsFiltro();
+
+// Exponer todas las funciones necesarias al scope global
+window.renderMovimientos=renderMovimientos;
+window.navTo=navTo;
+window.actualizarCatsModal=actualizarCatsModal;
+window.calcularResumen=calcularResumen;
 </script>
 </body>
 </html>
