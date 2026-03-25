@@ -348,7 +348,11 @@ window.calcularResumenDayu=()=>{
   } else {infoEl.className='info-box warn';infoEl.innerHTML='⚠️ Sin período configurado.';}
 };
 
+let _guardandoDayu=false;
 window.guardarDayu=async()=>{
+  if(_guardandoDayu)return;
+  _guardandoDayu=true;
+  try{
   const monto=parseFloat(document.getElementById('d-monto').value);
   const fecha=document.getElementById('d-fecha').value;
   const desc=document.getElementById('d-desc').value.trim();
@@ -360,6 +364,7 @@ window.guardarDayu=async()=>{
   document.getElementById('d-monto').value='';document.getElementById('d-desc').value='';document.getElementById('d-cuenta').value='';document.getElementById('d-resumen-row').style.display='none';
   const conf=document.getElementById('dayu-confirm');conf.style.display='block';conf.innerHTML=`✓ Guardado: <strong>${desc}</strong> · ${fmt(monto)}`;
   setTimeout(()=>conf.style.display='none',3000);
+  }finally{_guardandoDayu=false;}
 };
 
 function renderHistorial(){
