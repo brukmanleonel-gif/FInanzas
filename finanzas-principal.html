@@ -717,7 +717,7 @@ window.guardarMovimiento=async()=>{
       batch.push(addDoc(collection(db,'movimientos'),{
         fecha,tipo:'gasto',monto:montoCuota,moneda:'ARS',categoria,cuenta,
         desc:`${desc} — cuota ${i+1}/${cuotas}`,
-        mesResumen,quien:'Leo',esCuota:true,esCuotaFutura:esFutura,
+        mesResumen,quien:(currentUser&&currentUser.email==='daianastarosc@gmail.com')?'Dayu':'Leo',esCuota:true,esCuotaFutura:esFutura,
         cuotaActual:i+1,cuotaTotal:cuotas,timestamp:Date.now()
       }));
     }
