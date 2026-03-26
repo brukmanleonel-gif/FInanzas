@@ -285,12 +285,12 @@ input[type=text],input[type=date],input[type=number],select{width:100%}
       <div class="form-group"><label>Medio de pago</label>
         <select id="m-cuenta" onchange="window.calcularResumen();window.toggleCuotas()">
           <option value="">Efectivo / Débito</option>
-          <option value="VG">💳 VG - Visa Galicia (Leo)</option>
-          <option value="MG">💳 MG - MC Galicia (Leo)</option>
-          <option value="MN">💳 MN - MC Nación (Leo)</option>
-          <option value="VM">💳 VM - Visa Macro (Leo)</option>
-          <option value="AE">💳 AE - Amex (Leo)</option>
-          <option value="AM">💳 AM - Amex Macro (Leo)</option>
+          <option value="VG" class="solo-leo">💳 VG - Visa Galicia (Leo)</option>
+          <option value="MG" class="solo-leo">💳 MG - MC Galicia (Leo)</option>
+          <option value="MN" class="solo-leo">💳 MN - MC Nación (Leo)</option>
+          <option value="VM" class="solo-leo">💳 VM - Visa Macro (Leo)</option>
+          <option value="AE" class="solo-leo">💳 AE - Amex (Leo)</option>
+          <option value="AM" class="solo-leo">💳 AM - Amex Macro (Leo)</option>
           <option value="VGD">💳 VGD - Visa Galicia (Dayu)</option>
           <option value="MGD">💳 MGD - MC Galicia (Dayu)</option>
           <option value="VFD">💳 VFD - Visa Francés (Dayu)</option>
@@ -397,6 +397,7 @@ onAuthStateChanged(auth,user=>{
     document.getElementById('app').style.display='flex';
     currentUser=user;
     document.getElementById('user-email').textContent=user.email;
+    filtrarTarjetasPorUsuario();
     iniciarListeners();
   } else if(user){
     signOut(auth);
@@ -414,6 +415,10 @@ document.getElementById('btn-google-login').onclick=async()=>{
 };
 window.cerrarSesion=()=>signOut(auth);
 
+function filtrarTarjetasPorUsuario(){
+  const esDayu=currentUser&&currentUser.email==='daianastarosc@gmail.com';
+  document.querySelectorAll('.solo-leo').forEach(el=>el.style.display=esDayu?'none':'block');
+}
 function iniciarListeners(){
   setSyncStatus('● Conectando...','var(--accent3)');
   unsubMovs=onSnapshot(collection(db,'movimientos'),snap=>{
